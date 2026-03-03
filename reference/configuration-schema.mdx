@@ -1,0 +1,474 @@
+---
+title: Configuration schema
+description: Complete YAML configuration reference for Pomo with all available options
+---
+
+Pomo is configured using a `pomo.yaml` file in YAML format. This page documents every configuration option, its type, default value, and behavior.
+
+## Configuration file location
+
+Pomo searches for `pomo.yaml` in the following order:
+
+1. Current working directory (`./pomo.yaml`)
+2. `~/.config/pomo/pomo.yaml` (Linux and macOS)
+3. User config directory on other platforms
+
+If no configuration file is found, Pomo uses the default values documented below.
+
+---
+
+## Complete example
+
+```yaml pomo.yaml
+onSessionEnd: ask
+
+asciiArt:
+  enabled: true
+  font: mono12
+  color: "#FF6B6B"
+
+work:
+  duration: 25m
+  title: "work session"
+  notification:
+    enabled: true
+    urgent: false
+    title: "work finished 🎉"
+    message: "time to take a break!"
+    icon: ""
+
+break:
+  duration: 5m
+  title: "break session"
+  notification:
+    enabled: true
+    urgent: false
+    title: "break over 😴"
+    message: "back to work!"
+    icon: ""
+
+longBreak:
+  enabled: true
+  after: 4
+  duration: 15m
+```
+
+---
+
+## Session behavior
+
+<ParamField path="onSessionEnd" type="string" default="ask">
+  Controls what happens when a session (work or break) completes.
+  
+  **Valid values:**
+  - `ask` - Show confirmation dialog asking if you want to start the next session
+  - `auto` - Automatically start the next session without prompting
+  - `stop` - Exit Pomo when session completes
+  
+  **Example:**
+  ```yaml
+  onSessionEnd: auto  # Automatically chain sessions
+  ```
+  
+  **Note:** Even with `auto`, you can still use keybindings to control the timer during the session.
+</ParamField>
+
+---
+
+## ASCII art configuration
+
+Controls the large ASCII art timer display.
+
+<ParamField path="asciiArt.enabled" type="boolean" default="true">
+  Enable or disable the ASCII art countdown timer.
+  
+  When `true`, displays a large ASCII art timer. When `false`, shows a simpler text-based timer.
+  
+  **Example:**
+  ```yaml
+  asciiArt:
+    enabled: false  # Use minimal text display
+  ```
+</ParamField>
+
+<ParamField path="asciiArt.font" type="string" default="mono12">
+  The ASCII art font to use for the timer display.
+  
+  **Valid values:**
+  - `mono12` - Clean monospaced font with rounded edges (default)
+  - `rebel` - Bold angular font with gradient shading
+  - `ansi` - Compact solid block font
+  - `ansiShadow` - Elegant font with box-drawing borders
+  
+  **Example:**
+  ```yaml
+  asciiArt:
+    font: rebel  # Use bold angular font
+  ```
+  
+  See the [ASCII fonts reference](/reference/fonts) for visual examples of each font.
+</ParamField>
+
+<ParamField path="asciiArt.color" type="string" default="#FF6B6B">
+  Hex color code for the ASCII art timer.
+  
+  Must be a valid hex color in the format `#RRGGBB`.
+  
+  **Example:**
+  ```yaml
+  asciiArt:
+    color: "#00FF00"  # Bright green timer
+  ```
+  
+  **Note:** Requires a terminal with true color support for accurate color rendering.
+</ParamField>
+
+---
+
+## Work session configuration
+
+Settings for Pomodoro work sessions.
+
+<ParamField path="work.duration" type="duration" default="25m">
+  Default duration for work sessions.
+  
+  Uses Go duration format: `25m`, `1h30m`, `45m`, etc.
+  
+  **Example:**
+  ```yaml
+  work:
+    duration: 45m  # 45-minute work sessions
+  ```
+  
+  **Note:** Can be overridden per-session using command-line arguments: `pomo 1h`
+</ParamField>
+
+<ParamField path="work.title" type="string" default="work session">
+  Display title shown during work sessions.
+  
+  Appears in the terminal UI and can be used to customize the session label.
+  
+  **Example:**
+  ```yaml
+  work:
+    title: "focus time"
+  ```
+</ParamField>
+
+<ParamField path="work.notification.enabled" type="boolean" default="true">
+  Enable desktop notifications when work sessions complete.
+  
+  **Example:**
+  ```yaml
+  work:
+    notification:
+      enabled: false  # Disable work completion notifications
+  ```
+</ParamField>
+
+<ParamField path="work.notification.urgent" type="boolean" default="false">
+  Mark work completion notifications as urgent.
+  
+  When `true`, the notification may bypass Do Not Disturb settings (platform-dependent).
+  
+  **Example:**
+  ```yaml
+  work:
+    notification:
+      urgent: true  # Make notifications more prominent
+  ```
+</ParamField>
+
+<ParamField path="work.notification.title" type="string" default="work finished 🎉">
+  Title text for work completion notifications.
+  
+  **Example:**
+  ```yaml
+  work:
+    notification:
+      title: "Session complete!"
+  ```
+</ParamField>
+
+<ParamField path="work.notification.message" type="string" default="time to take a break!">
+  Body text for work completion notifications.
+  
+  **Example:**
+  ```yaml
+  work:
+    notification:
+      message: "Great work! Time to rest."
+  ```
+</ParamField>
+
+<ParamField path="work.notification.icon" type="string" default="">
+  Path to custom notification icon image.
+  
+  Supports absolute paths and `~/` for home directory. Leave empty to use the default Pomo icon.
+  
+  **Example:**
+  ```yaml
+  work:
+    notification:
+      icon: "~/Pictures/work-icon.png"
+  ```
+  
+  **Note:** Icon format support varies by platform (PNG recommended).
+</ParamField>
+
+<ParamField path="work.then" type="array" default="[]">
+  Commands to execute when work session completes.
+  
+  Each item is an array of strings representing a command and its arguments.
+  
+  **Example:**
+  ```yaml
+  work:
+    then:
+      - ["notify-send", "Break time!"]
+      - ["play", "~/sounds/break.mp3"]
+  ```
+  
+  **Security note:** Commands run with your user permissions. Only use trusted commands.
+</ParamField>
+
+---
+
+## Break session configuration
+
+Settings for short break sessions between work periods.
+
+<ParamField path="break.duration" type="duration" default="5m">
+  Default duration for short break sessions.
+  
+  Uses Go duration format: `5m`, `10m`, `15m`, etc.
+  
+  **Example:**
+  ```yaml
+  break:
+    duration: 10m  # 10-minute breaks
+  ```
+  
+  **Note:** Can be overridden per-session using: `pomo 25m 10m`
+</ParamField>
+
+<ParamField path="break.title" type="string" default="break session">
+  Display title shown during break sessions.
+  
+  **Example:**
+  ```yaml
+  break:
+    title: "rest time"
+  ```
+</ParamField>
+
+<ParamField path="break.notification.enabled" type="boolean" default="true">
+  Enable desktop notifications when break sessions complete.
+  
+  **Example:**
+  ```yaml
+  break:
+    notification:
+      enabled: true
+  ```
+</ParamField>
+
+<ParamField path="break.notification.urgent" type="boolean" default="false">
+  Mark break completion notifications as urgent.
+  
+  **Example:**
+  ```yaml
+  break:
+    notification:
+      urgent: false
+  ```
+</ParamField>
+
+<ParamField path="break.notification.title" type="string" default="break over 😴">
+  Title text for break completion notifications.
+  
+  **Example:**
+  ```yaml
+  break:
+    notification:
+      title: "Break finished!"
+  ```
+</ParamField>
+
+<ParamField path="break.notification.message" type="string" default="back to work!">
+  Body text for break completion notifications.
+  
+  **Example:**
+  ```yaml
+  break:
+    notification:
+      message: "Ready to focus again?"
+  ```
+</ParamField>
+
+<ParamField path="break.notification.icon" type="string" default="">
+  Path to custom notification icon for breaks.
+  
+  **Example:**
+  ```yaml
+  break:
+    notification:
+      icon: "~/Pictures/break-icon.png"
+  ```
+</ParamField>
+
+<ParamField path="break.then" type="array" default="[]">
+  Commands to execute when break session completes.
+  
+  **Example:**
+  ```yaml
+  break:
+    then:
+      - ["osascript", "-e", 'say "Back to work"']
+  ```
+</ParamField>
+
+---
+
+## Long break configuration
+
+Settings for extended break sessions after multiple work periods.
+
+<ParamField path="longBreak.enabled" type="boolean" default="true">
+  Enable automatic long breaks after a certain number of work sessions.
+  
+  When enabled, Pomo will substitute a long break for a short break every N work sessions.
+  
+  **Example:**
+  ```yaml
+  longBreak:
+    enabled: true
+  ```
+</ParamField>
+
+<ParamField path="longBreak.after" type="integer" default="4">
+  Number of work sessions before triggering a long break.
+  
+  After this many completed work sessions, the next break will use `longBreak.duration` instead of `break.duration`.
+  
+  **Example:**
+  ```yaml
+  longBreak:
+    after: 3  # Long break every 3 work sessions
+  ```
+  
+  **Validation:** Must be greater than 0. Invalid values default to 4.
+</ParamField>
+
+<ParamField path="longBreak.duration" type="duration" default="15m">
+  Duration for long break sessions.
+  
+  Typically longer than regular breaks to provide extended rest periods.
+  
+  **Example:**
+  ```yaml
+  longBreak:
+    duration: 30m  # 30-minute long breaks
+  ```
+</ParamField>
+
+---
+
+## Data types reference
+
+### Duration format
+
+All duration fields use Go's `time.Duration` format:
+
+- `s` - seconds: `30s`, `90s`
+- `m` - minutes: `5m`, `25m`, `45m`
+- `h` - hours: `1h`, `2h`
+- Combined: `1h30m`, `2h15m30s`
+
+**Valid examples:**
+```yaml
+duration: 25m       # 25 minutes
+duration: 1h30m     # 1.5 hours
+duration: 90s       # 90 seconds
+```
+
+**Invalid examples:**
+```yaml
+duration: 25        # Missing unit
+duration: 1.5h      # Decimal not allowed
+duration: 25min     # Wrong unit name
+```
+
+### Color format
+
+Color fields accept hex color codes:
+
+**Format:** `#RRGGBB` where RR, GG, BB are hexadecimal values (00-FF)
+
+**Examples:**
+```yaml
+color: "#FF6B6B"    # Coral red (default)
+color: "#00FF00"    # Bright green
+color: "#3498DB"    # Blue
+color: "#FFFFFF"    # White
+```
+
+---
+
+## Configuration validation
+
+Pomo validates configuration values at startup:
+
+1. **Duration parsing**: Invalid durations cause an error and prevent startup
+2. **Long break count**: Values ≤ 0 are reset to default (4)
+3. **Font names**: Invalid fonts fall back to `mono12`
+4. **File paths**: Tilde (`~`) is expanded to home directory
+
+<Note>
+  If Pomo fails to load your configuration file, it will print an error message and exit with code 1. Check the error message for details about what went wrong.
+</Note>
+
+---
+
+## Minimal configuration
+
+You don't need to specify every option. This minimal config is valid:
+
+```yaml pomo.yaml
+work:
+  duration: 25m
+
+break:
+  duration: 5m
+```
+
+All other options will use their default values.
+
+---
+
+## Platform-specific notes
+
+### macOS
+- Notifications use native macOS notification center
+- Config location: `~/.config/pomo/pomo.yaml`
+- Icon format: PNG, ICNS
+
+### Linux
+- Notifications use libnotify (requires `notify-send`)
+- Config location: `~/.config/pomo/pomo.yaml`
+- Icon format: PNG, SVG
+
+### Windows
+- Notifications use Windows notification system
+- Config location: `%APPDATA%\pomo\pomo.yaml`
+- Icon format: PNG, ICO
+
+---
+
+## Implementation reference
+
+Configuration is implemented in:
+- **Config loading**: `config/config.go:113-143`
+- **Default values**: `config/config.go:66-98`
+- **Validation**: `config/config.go:137-140`
+- **Struct definitions**: `config/config.go:26-59`

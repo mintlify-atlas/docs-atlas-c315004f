@@ -1,80 +1,303 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick start
+description: Run your first Pomodoro session in less than 5 minutes
 ---
 
-## Get started in three steps
+This guide will get you up and running with Pomo quickly. You'll start your first work session, learn the keyboard controls, and view your productivity statistics.
 
-Get your documentation site running locally and make your first customization.
+<Note>
+  Make sure you've [installed Pomo](/installation) before continuing.
+</Note>
 
-### Step 1: Set up your local environment
+## Your first work session
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+<Steps>
+  <Step title="Start a default work session">
+    Run Pomo with no arguments to start a 25-minute work session:
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
+    ```bash
+    pomo
+    ```
     
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
+    You'll see the timer interface with ASCII art displaying the countdown:
     
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    ```
+    ╔════════════════════════════════════════════════════════╗
+    ║                   WORK SESSION                         ║
+    ╚════════════════════════════════════════════════════════╝
+    
+         ██████   █████            ██████   ██████  
+        ░░██████ ░░███            ███░░███ ███░░███ 
+         ░███░███ ░███           ░███ ░░░ ░███ ░███ 
+         ░███░░███░███           ░░█████  ░███ ░███ 
+         ░███ ░░██████            ░░░░███ ░███ ░███ 
+         ░███  ░░█████            ███ ░███░░███ ███ 
+         █████  ░░█████          ░░██████  ░░░█████  
+        ░░░░░    ░░░░░            ░░░░░░     ░░░░░   
+    
+    ▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░░░░  2%
+    
+    ↑/k increase  Space pause  ←/h reset  s skip  q quit
+    ```
+  </Step>
+  
+  <Step title="Use keyboard controls">
+    While the timer is running, try these keyboard shortcuts:
+    
+    | Key | Action |
+    |-----|--------|
+    | `Space` | Pause/resume the timer |
+    | `↑` or `k` | Add 1 minute to the current session |
+    | `←` or `h` | Reset to initial duration |
+    | `s` | Skip to next session |
+    | `q` or `Ctrl+C` | Quit |
+    
+    Try pausing the timer:
+    
+    ```bash
+    # Press Space to pause
+    # Press Space again to resume
+    ```
+  </Step>
+  
+  <Step title="Complete the session">
+    Let the timer run down to zero (or press `s` to skip). When the work session completes, you'll see a confirmation prompt:
+    
+    ```
+    Work session complete! What would you like to do next?
+    
+    ○ Start break session (5 minutes)
+    ○ Start short session (2 minutes)  
+    ○ Quit
+    
+    y yes  n no  s short  Tab toggle  Enter submit  q quit
+    ```
+    
+    Press `y` or `Enter` to start your break session.
+  </Step>
+  
+  <Step title="Take a break">
+    The break session will start automatically:
+    
+    ```bash
+    pomo
+    # Complete work session → Press 'y' to start break
+    ```
+    
+    You'll receive a desktop notification when the work session ends:
+    
+    ```
+    🎉 work finished
+    time to take a break
+    ```
+  </Step>
+</Steps>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+## Custom session durations
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+You can override the default 25-minute work session with custom durations.
 
-### Step 3: Go live
+<Steps>
+  <Step title="Start a custom work session">
+    Specify a custom duration using Go's duration format (`1h`, `30m`, `90s`):
+    
+    ```bash
+    pomo 45m
+    ```
+    
+    This starts a 45-minute work session with the default 5-minute break.
+  </Step>
+  
+  <Step title="Customize both work and break">
+    Provide two arguments to set both work and break durations:
+    
+    ```bash
+    pomo 50m 10m
+    ```
+    
+    This starts a 50-minute work session followed by a 10-minute break.
+  </Step>
+  
+  <Step title="Start a break session directly">
+    You can start a break session without doing work first:
+    
+    ```bash
+    pomo break
+    # Or with custom duration
+    pomo break 15m
+    ```
+  </Step>
+</Steps>
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+<Tip>
+  Use `1h15m` for 1 hour 15 minutes, or combine units like `90m` (90 minutes). The format supports `h` (hours), `m` (minutes), and `s` (seconds).
+</Tip>
+
+## Common usage patterns
+
+Here are some common ways to use Pomo:
+
+<CodeGroup>
+
+```bash Default Pomodoro
+# 25 min work + 5 min break (default)
+pomo
+```
+
+```bash Extended focus
+# 45 min work + 15 min break
+pomo 45m 15m
+```
+
+```bash Short sprint
+# 15 min work + 3 min break
+pomo 15m 3m
+```
+
+```bash Deep work
+# 90 min work + 20 min break
+pomo 1h30m 20m
+```
+
+```bash Quick break
+# Start a 10 min break immediately
+pomo break 10m
+```
+
+</CodeGroup>
+
+## View your statistics
+
+After completing a few sessions, view your productivity statistics:
+
+<Steps>
+  <Step title="Open the stats view">
+    ```bash
+    pomo stats
+    ```
+    
+    You'll see a full-screen statistics dashboard with:
+    - **Duration ratio** - Total work time vs break time
+    - **Weekly bar chart** - Work hours for each day of the past week
+    - **4-month heatmap** - GitHub-style activity visualization
+  </Step>
+  
+  <Step title="Interpret the statistics">
+    The stats view shows:
+    
+    ```
+    ╔═══════════════════════════════════════════════════════╗
+    ║              POMODORO STATISTICS                      ║
+    ╚═══════════════════════════════════════════════════════╝
+    
+    Duration Ratio
+    ──────────────
+    Work:  2h 15m  ████████████████░░░░  75%
+    Break:   45m   ████░░░░░░░░░░░░░░░░  25%
+    
+    Weekly Activity
+    ───────────────
+    Mon  ████████░░░░░░░░  2.5h
+    Tue  ████████████░░░░  3.0h
+    Wed  ░░░░░░░░░░░░░░░░  0.0h
+    Thu  ████░░░░░░░░░░░░  1.0h
+    ...
+    ```
+  </Step>
+  
+  <Step title="Exit the stats view">
+    Press `q` or `Ctrl+C` to return to your terminal.
+  </Step>
+</Steps>
+
+<Warning>
+  The heatmap visualization requires a [Nerd Font](https://www.nerdfonts.com/) installed. Without it, you may see placeholder characters instead of icons.
+</Warning>
+
+## Long break cycles
+
+By default, Pomo tracks your work sessions and automatically offers a longer break after every 4 completed work sessions.
+
+```bash
+# Session 1-3: Work → 5 min break
+# Session 4: Work → 20 min long break (default)
+```
+
+You'll see a different prompt after your 4th session:
+
+```
+Work session complete! Time for a long break!
+
+○ Start long break (20 minutes)
+○ Start short session (2 minutes)
+○ Quit
+```
+
+<Tip>
+  Long breaks can be configured or disabled in the [configuration file](/configuration/session-settings). The default is a 20-minute break after 4 work sessions.
+</Tip>
+
+## Session summaries
+
+When you complete or quit a session, Pomo displays a summary:
+
+```bash
+╔═══════════════════════════════════════════════════════╗
+║              SESSION SUMMARY                          ║
+╚═══════════════════════════════════════════════════════╝
+
+Session type:     work
+Planned duration: 25m 0s
+Actual duration:  23m 45s
+Completed:        95%
+
+Great focus session! 🎉
+```
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
+Now that you've run your first sessions, explore more advanced features:
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Work sessions" icon="briefcase" href="/usage/work-sessions">
+    Learn about Pomodoro cycles, task chaining, and session management
+  </Card>
+  
+  <Card title="Configuration" icon="gear" href="/configuration/overview">
+    Customize default durations, notifications, and appearance
+  </Card>
+  
+  <Card title="Keyboard shortcuts" icon="keyboard" href="/reference/keybindings">
+    Master all keyboard shortcuts for efficient timer control
+  </Card>
+  
+  <Card title="Statistics" icon="chart-line" href="/usage/statistics">
+    Deep dive into productivity tracking and analytics
+  </Card>
 </CardGroup>
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+## Common issues
+
+<AccordionGroup>
+  <Accordion title="Notifications not appearing">
+    Make sure your system allows notifications from terminal applications. On macOS, check **System Settings → Notifications**. On Linux, ensure you have a notification daemon running.
+  </Accordion>
+  
+  <Accordion title="ASCII art looks broken">
+    Ensure your terminal supports 256 colors and UTF-8 encoding. Try a different terminal emulator or disable ASCII art in the configuration file.
+  </Accordion>
+  
+  <Accordion title="Command not found">
+    If you installed via `go install`, ensure your `$GOPATH/bin` is in your `$PATH`:
+    
+    ```bash
+    export PATH="$PATH:$(go env GOPATH)/bin"
+    ```
+    
+    Add this to your `.bashrc`, `.zshrc`, or shell configuration file.
+  </Accordion>
+  
+  <Accordion title="Heatmap shows boxes instead of icons">
+    Install a [Nerd Font](https://www.nerdfonts.com/) and configure your terminal to use it. Popular choices include "Fira Code Nerd Font", "JetBrains Mono Nerd Font", or "Hack Nerd Font".
+  </Accordion>
+</AccordionGroup>

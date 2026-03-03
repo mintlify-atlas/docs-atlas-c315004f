@@ -1,0 +1,223 @@
+---
+title: Sound notifications
+description: Learn how to set up audio notifications when Pomo sessions complete
+---
+
+Pomo allows you to play custom sounds when work or break sessions complete using the `then` field in your configuration. This is useful for audio feedback in addition to or instead of desktop notifications.
+
+## How it works
+
+The `then` field accepts an array of commands that run automatically when a session ends. Each command is specified as an array of strings, where the first element is the executable and subsequent elements are arguments.
+
+```yaml
+work:
+  then:
+    - [paplay, ~/sounds/work-done.mp3]
+```
+
+<Note>
+  Commands in the `then` field run in parallel with desktop notifications and have a 5-second timeout (defined in `actions/actions.go:15`).
+</Note>
+
+## Platform-specific examples
+
+Different operating systems use different audio players. Here are the recommended commands for each platform:
+
+<CodeGroup>
+
+```yaml Linux
+work:
+  duration: 25m
+  then:
+    - [paplay, ~/sounds/work-done.mp3]
+
+break:
+  duration: 5m
+  then:
+    - [paplay, ~/sounds/break-done.mp3]
+```
+
+```yaml macOS
+work:
+  duration: 25m
+  then:
+    - [afplay, ~/sounds/work-done.mp3]
+
+break:
+  duration: 5m
+  then:
+    - [afplay, ~/sounds/break-done.mp3]
+```
+
+```yaml Windows
+work:
+  duration: 25m
+  then:
+    - [powershell, start, work-done.mp3]
+
+break:
+  duration: 5m
+  then:
+    - [powershell, start, break-done.mp3]
+```
+
+</CodeGroup>
+
+## Text-to-speech examples
+
+You can also use text-to-speech commands for spoken notifications:
+
+<CodeGroup>
+
+```yaml Linux (spd-say)
+work:
+  then:
+    - [spd-say, "Time to take a break"]
+
+break:
+  then:
+    - [spd-say, "Back to work!"]
+```
+
+```yaml macOS (say)
+work:
+  then:
+    - [say, "Work session complete"]
+
+break:
+  then:
+    - [say, "Break is over"]
+```
+
+```yaml Windows (PowerShell)
+work:
+  then:
+    - [powershell, -Command, "Add-Type -AssemblyName System.Speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak('Work complete')"]
+```
+
+</CodeGroup>
+
+## Complete configuration example
+
+Here's a full example combining sound notifications with desktop notifications:
+
+```yaml
+work:
+  duration: 25m
+  title: work session
+  
+  # Desktop notification
+  notification:
+    enabled: true
+    urgent: true
+    title: work finished 🎉
+    message: time to take a break
+  
+  # Sound notification
+  then:
+    - [paplay, ~/sounds/bell.wav]
+
+break:
+  duration: 5m
+  title: break session
+  
+  notification:
+    enabled: true
+    urgent: false
+    title: break over 😴
+    message: back to work!
+  
+  then:
+    - [spd-say, "Back to work!"]
+
+longBreak:
+  enabled: true
+  after: 4
+  duration: 15m
+```
+
+## Command timeout behavior
+
+<Warning>
+  All commands in the `then` field have a **5-second timeout**. If a command takes longer than this, it will be terminated.
+</Warning>
+
+The timeout is enforced by the context system in `actions/actions.go:69`. This prevents hung processes from blocking the application.
+
+## Auto-cancellation
+
+Commands are automatically cancelled when you start the next session. This is handled through Go's context cancellation mechanism:
+
+<Steps>
+  <Step title="Session completes">
+    The timer reaches zero and post-actions are triggered
+  </Step>
+  
+  <Step title="Commands start">
+    All commands in the `then` array begin executing in parallel
+  </Step>
+  
+  <Step title="User starts next session">
+    If you start the next session before commands finish, they receive a cancellation signal
+  </Step>
+  
+  <Step title="Cleanup">
+    Running commands are gracefully terminated
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<Accordion title="Sound doesn't play">
+  **Check the audio player is installed:**
+  
+  ```bash
+  # Linux - check for paplay
+  which paplay
+  
+  # macOS - check for afplay
+  which afplay
+  ```
+  
+  **Verify the audio file path:**
+  
+  - Use absolute paths or `~/` for home directory
+  - Ensure the file exists and is a valid audio format
+  - Test the command manually in your terminal first
+  
+  **Check file permissions:**
+  
+  ```bash
+  ls -l ~/sounds/work-done.mp3
+  ```
+</Accordion>
+
+<Accordion title="Command times out">
+  If your audio file is longer than 5 seconds, it will be cut off. Solutions:
+  
+  - Use shorter audio files (under 5 seconds)
+  - The timeout is hardcoded in `actions/actions.go:15` and cannot be configured
+</Accordion>
+
+<Accordion title="Command syntax errors">
+  Common mistakes:
+  
+  ```yaml
+  # ❌ Wrong - single string
+  then: "paplay ~/sounds/bell.wav"
+  
+  # ❌ Wrong - nested incorrectly
+  then:
+    - paplay ~/sounds/bell.wav
+  
+  # ✅ Correct - array of arrays
+  then:
+    - [paplay, ~/sounds/bell.wav]
+  ```
+</Accordion>
+
+## Related topics
+
+- [Custom commands](/advanced/custom-commands) - Learn about advanced command automation
+- [Configuration overview](/configuration/overview) - Full configuration reference
+- [Notifications](/configuration/notifications) - Desktop notification setup

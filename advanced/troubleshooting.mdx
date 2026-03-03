@@ -1,0 +1,482 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for Pomo timer
+---
+
+This guide covers common problems you might encounter while using Pomo and how to resolve them.
+
+## Debug logging
+
+Before troubleshooting, enable debug logging to see detailed execution information:
+
+```bash
+DEBUG=1 pomo 25m
+```
+
+This creates a `debug.log` file in the current directory with detailed logs (see `cmd/root.go:58-68`).
+
+<Tip>
+  Debug logs include config loading, notification attempts, command execution, and database operations. Always check this file first when diagnosing issues.
+</Tip>
+
+## Configuration issues
+
+<Accordion title="Config file not found">
+  **Problem:** Pomo doesn't load your custom configuration.
+  
+  **Solution:** Pomo searches for config files in this order (see `config/config.go:166-184`):
+  
+  1. **Current directory**: `./pomo.yaml` (highest priority)
+  2. **System config directory**:
+     - Linux/macOS: `~/.config/pomo/pomo.yaml`
+     - Windows: `%APPDATA%\pomo\pomo.yaml`
+  3. **Built-in defaults** if no config found
+  
+  **Check which config is loaded:**
+  
+  ```bash
+  DEBUG=1 pomo 25m 2>&1 | grep "config"
+  ```
+  
+  **Create config in the correct location:**
+  
+  ```bash
+  # Linux/macOS
+  mkdir -p ~/.config/pomo
+  touch ~/.config/pomo/pomo.yaml
+  
+  # Or use current directory
+  touch pomo.yaml
+  ```
+</Accordion>
+
+<Accordion title="Invalid configuration syntax">
+  **Problem:** Config file exists but Pomo shows errors or uses defaults.
+  
+  **Common YAML syntax errors:**
+  
+  ```yaml
+  # ❌ Wrong - incorrect indentation
+  work:
+  duration: 25m
+  
+  # ✅ Correct - proper indentation
+  work:
+    duration: 25m
+  
+  # ❌ Wrong - missing quotes for special characters
+  notification:
+    title: It's time!
+  
+  # ✅ Correct - quoted strings with special chars
+  notification:
+    title: "It's time!"
+  
+  # ❌ Wrong - wrong array syntax for commands
+  then: [paplay ~/sounds/bell.wav]
+  
+  # ✅ Correct - nested array syntax
+  then:
+    - [paplay, ~/sounds/bell.wav]
+  ```
+  
+  **Validate your YAML:**
+  
+  ```bash
+  # Use yamllint if available
+  yamllint ~/.config/pomo/pomo.yaml
+  ```
+</Accordion>
+
+<Accordion title="Invalid duration values">
+  **Problem:** Error message like "invalid duration: 'abc'"
+  
+  **Solution:** Use proper Go duration format:
+  
+  - Valid: `25m`, `1h30m`, `90m`, `5m30s`
+  - Invalid: `25`, `1:30`, `90 minutes`
+  
+  ```yaml
+  work:
+    duration: 25m  # ✅ Correct
+    # duration: 25  # ❌ Wrong - missing unit
+  ```
+  
+  The duration parsing happens in `cmd/runner.go:42-46`.
+</Accordion>
+
+## Notification issues
+
+<Accordion title="Desktop notifications don't appear">
+  **Problem:** No desktop notifications when sessions complete.
+  
+  **Platform-specific solutions:**
+  
+  **Linux:**
+  - Check if notification daemon is running:
+    ```bash
+    ps aux | grep notification
+    ```
+  - Install notification support:
+    ```bash
+    # Debian/Ubuntu
+    sudo apt-get install libnotify-bin
+    
+    # Fedora/RHEL
+    sudo dnf install libnotify
+    ```
+  - Test notifications manually:
+    ```bash
+    notify-send "Test" "Hello"
+    ```
+  
+  **macOS:**
+  - Grant terminal notification permissions:
+    1. System Preferences → Notifications
+    2. Find your terminal app (Terminal, iTerm2, etc.)
+    3. Enable "Allow Notifications"
+  
+  **Windows:**
+  - Check Windows notification settings:
+    1. Settings → System → Notifications
+    2. Ensure notifications are enabled
+    3. Check if app notifications are allowed
+  
+  **Verify config:**
+  
+  ```yaml
+  work:
+    notification:
+      enabled: true  # Must be true
+      title: work finished 🎉
+      message: time to take a break
+  ```
+</Accordion>
+
+<Accordion title="Notification permission denied">
+  **Problem:** Logs show "failed to send notification: permission denied"
+  
+  **Solution:**
+  
+  1. **macOS:** Grant permission in System Preferences → Notifications
+  2. **Linux (Flatpak):** Grant notification permission:
+     ```bash
+     flatpak permission-set notifications app-id yes
+     ```
+  3. **Snap packages:** Ensure notification interface is connected:
+     ```bash
+     snap connections pomo
+     ```
+</Accordion>
+
+<Accordion title="Custom notification icon not showing">
+  **Problem:** Custom icon path doesn't display.
+  
+  **Solution:**
+  
+  ```yaml
+  work:
+    notification:
+      # ✅ Use absolute path or ~/
+      icon: ~/icons/pomo.png
+      
+      # ❌ Avoid relative paths
+      # icon: ./icon.png
+  ```
+  
+  - Ensure the file exists: `ls -l ~/icons/pomo.png`
+  - Use PNG format for best compatibility
+  - Path expansion happens in `config/config.go:129-135`
+</Accordion>
+
+## Display issues
+
+<Accordion title="ASCII art timer doesn't display correctly">
+  **Problem:** Timer shows garbled characters or boxes.
+  
+  **Solution:**
+  
+  1. **Use a terminal with proper Unicode support:**
+     - ✅ Modern terminals: iTerm2, Alacritty, Windows Terminal
+     - ⚠️ May have issues: older cmd.exe, basic terminal emulators
+  
+  2. **Try different fonts:**
+     ```yaml
+     asciiArt:
+       enabled: true
+       font: mono12  # Try: mono12, rebel, ansi, ansiShadow
+     ```
+     
+     Available fonts are defined in `ui/ascii/fonts.go`.
+  
+  3. **Disable ASCII art if problems persist:**
+     ```yaml
+     asciiArt:
+       enabled: false
+     ```
+</Accordion>
+
+<Accordion title="Colors don't appear">
+  **Problem:** Timer displays in monochrome.
+  
+  **Solution:**
+  
+  1. **Check terminal color support:**
+     ```bash
+     echo $TERM
+     # Should show: xterm-256color, screen-256color, etc.
+     ```
+  
+  2. **Enable colors in terminal:**
+     ```bash
+     # Bash/Zsh
+     export TERM=xterm-256color
+     ```
+  
+  3. **Verify color in config:**
+     ```yaml
+     asciiArt:
+       color: "#5A56E0"  # Hex color
+       # color: "none"    # Disable color
+     ```
+</Accordion>
+
+<Accordion title="Heatmap icons missing in stats">
+  **Problem:** `pomo stats` shows boxes instead of icons in heatmap.
+  
+  **Solution:**
+  
+  The heatmap requires a [Nerd Font](https://www.nerdfonts.com/) to display icons correctly.
+  
+  1. **Install a Nerd Font:**
+     ```bash
+     # macOS with Homebrew
+     brew tap homebrew/cask-fonts
+     brew install font-hack-nerd-font
+     ```
+  
+  2. **Configure your terminal to use the font:**
+     - iTerm2: Preferences → Profiles → Text → Font
+     - Alacritty: Edit `~/.config/alacritty/alacritty.yml`
+     - Windows Terminal: Settings → Profiles → Appearance → Font face
+  
+  3. **Choose a Nerd Font variant:**
+     - FiraCode Nerd Font
+     - Hack Nerd Font
+     - JetBrainsMono Nerd Font
+</Accordion>
+
+## Sound and command issues
+
+<Accordion title="Sound notifications don't play">
+  **Problem:** No sound when using `then` commands.
+  
+  **Solution:**
+  
+  1. **Verify audio player is installed:**
+     ```bash
+     # Linux
+     which paplay
+     
+     # macOS
+     which afplay
+     ```
+  
+  2. **Test command manually:**
+     ```bash
+     paplay ~/sounds/bell.wav
+     ```
+  
+  3. **Check file path and format:**
+     - Use absolute paths: `~/sounds/bell.wav`
+     - Verify file exists: `ls -l ~/sounds/bell.wav`
+     - Use supported formats: WAV, MP3, OGG
+  
+  4. **Check command syntax:**
+     ```yaml
+     # ✅ Correct
+     then:
+       - [paplay, ~/sounds/bell.wav]
+     
+     # ❌ Wrong - missing array wrapper
+     then: [paplay, ~/sounds/bell.wav]
+     ```
+  
+  See [Sound notifications](/advanced/sound-notifications) for detailed setup.
+</Accordion>
+
+<Accordion title="Custom commands not running">
+  **Problem:** Commands in `then` field don't execute.
+  
+  **Solution:**
+  
+  1. **Enable debug logging:**
+     ```bash
+     DEBUG=1 pomo 25m
+     ```
+     
+     Check `debug.log` for errors like:
+     ```
+     failed to run command: exec: "invalid-cmd": executable file not found
+     ```
+  
+  2. **Verify command exists:**
+     ```bash
+     which your-command
+     ```
+  
+  3. **Use full paths for safety:**
+     ```yaml
+     then:
+       - [/usr/bin/notify-send, "Pomo", "Done"]
+     ```
+  
+  4. **Check timeout (5 seconds):**
+     
+     Commands exceeding 5 seconds are terminated (see `actions/actions.go:15`).
+     
+     For long tasks, run in background:
+     ```yaml
+     then:
+       - [sh, -c, "nohup ~/long-script.sh &"]
+     ```
+  
+  See [Custom commands](/advanced/custom-commands) for advanced usage.
+</Accordion>
+
+## Database and statistics issues
+
+<Accordion title="Stats command shows no data">
+  **Problem:** `pomo stats` displays empty or zero data.
+  
+  **Cause:** 
+  - No completed sessions recorded yet
+  - Database file missing or corrupted
+  - Database location changed
+  
+  **Solution:**
+  
+  1. **Complete at least one full session** (don't quit early)
+  
+  2. **Check database location:**
+     - Linux/macOS: `~/.local/state/pomo/pomo.db`
+     - Windows: `%APPDATA%\pomo\pomo.db`
+     
+     Defined in `db/connect.go:71-92`.
+  
+  3. **Verify database exists:**
+     ```bash
+     # Linux/macOS
+     ls -l ~/.local/state/pomo/pomo.db
+     
+     # Check database integrity
+     sqlite3 ~/.local/state/pomo/pomo.db "SELECT COUNT(*) FROM sessions;"
+     ```
+</Accordion>
+
+<Accordion title="Database connection errors">
+  **Problem:** Errors like "failed to connect to the db" in logs.
+  
+  **Solution:**
+  
+  1. **Check directory permissions:**
+     ```bash
+     # Linux/macOS
+     ls -ld ~/.local/state/pomo
+     chmod 755 ~/.local/state/pomo
+     ```
+  
+  2. **Ensure SQLite is available:**
+     
+     Pomo uses embedded SQLite (modernc.org/sqlite), but the directory must be writable.
+  
+  3. **Remove corrupted database:**
+     ```bash
+     # Backup first!
+     cp ~/.local/state/pomo/pomo.db ~/pomo-backup.db
+     
+     # Remove corrupted DB (will recreate on next run)
+     rm ~/.local/state/pomo/pomo.db
+     ```
+</Accordion>
+
+<Accordion title="Stats not updating after sessions">
+  **Problem:** Completed sessions don't appear in `pomo stats`.
+  
+  **Solution:**
+  
+  1. **Ensure you complete the full session**
+     
+     Quitting early (Ctrl+C before timer ends) may not record stats.
+  
+  2. **Check for database write errors:**
+     ```bash
+     DEBUG=1 pomo 1m
+     # Complete the session, then check debug.log
+     grep -i "db\|database\|insert" debug.log
+     ```
+  
+  3. **Verify database is writable:**
+     ```bash
+     # Linux/macOS
+     ls -l ~/.local/state/pomo/pomo.db
+     # Should NOT be owned by root or read-only
+     ```
+</Accordion>
+
+## Installation issues
+
+<Accordion title="Command not found after installation">
+  **Problem:** `pomo: command not found` after installing.
+  
+  **Solution by installation method:**
+  
+  **Go install:**
+  ```bash
+  # Ensure Go bin is in PATH
+  export PATH=$PATH:$(go env GOPATH)/bin
+  
+  # Add to ~/.bashrc or ~/.zshrc
+  echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.bashrc
+  ```
+  
+  **Homebrew (macOS):**
+  ```bash
+  # Verify installation
+  brew list pomo
+  
+  # Reinstall if needed
+  brew reinstall bahaaio/pomo/pomo
+  ```
+  
+  **From source:**
+  ```bash
+  # Move binary to PATH
+  sudo mv pomo /usr/local/bin/
+  ```
+</Accordion>
+
+## Getting help
+
+If your issue isn't covered here:
+
+1. **Enable debug logging** and check `debug.log`:
+   ```bash
+   DEBUG=1 pomo 25m
+   cat debug.log
+   ```
+
+2. **Check existing issues** on [GitHub](https://github.com/Bahaaio/pomo/issues)
+
+3. **Create a new issue** with:
+   - Your operating system and version
+   - Pomo version: `pomo --version`
+   - Config file contents (remove sensitive data)
+   - Relevant `debug.log` excerpts
+   - Steps to reproduce the problem
+
+## Related topics
+
+- [Configuration overview](/configuration/overview) - Configuration file reference
+- [Sound notifications](/advanced/sound-notifications) - Audio setup
+- [Custom commands](/advanced/custom-commands) - Command automation

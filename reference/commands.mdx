@@ -1,0 +1,187 @@
+---
+title: CLI commands
+description: Complete reference for all Pomo command-line interface commands
+---
+
+Pomo provides a simple command-line interface for managing Pomodoro sessions. All commands support duration parsing in Go's time format (e.g., `25m`, `1h30m`).
+
+## pomo
+
+Start a Pomodoro work session with optional custom duration.
+
+```bash
+pomo [work duration] [break duration]
+```
+
+### Arguments
+
+<ParamField path="work duration" type="string" optional>
+  Duration for the work session in Go duration format (e.g., `25m`, `1h`, `45m30s`). If omitted, uses the `work.duration` value from your configuration file.
+</ParamField>
+
+<ParamField path="break duration" type="string" optional>
+  Duration for the break session in Go duration format. If omitted, uses the `break.duration` value from your configuration file.
+</ParamField>
+
+### Examples
+
+```bash
+# Start work session with default duration (25 minutes)
+pomo
+
+# Start 1 hour 15 minute work session
+pomo 1h15m
+
+# Start 45 minute work session with 15 minute break
+pomo 45m 15m
+
+# Start 90 minute work session
+pomo 1h30m
+```
+
+### Behavior
+
+- Launches an interactive terminal UI with a countdown timer
+- Displays ASCII art timer (if enabled in configuration)
+- Shows progress bar and elapsed time
+- Sends desktop notification when session completes
+- After completion, prompts to start break session (based on `onSessionEnd` config)
+
+### Error handling
+
+If an invalid duration is provided, Pomo will:
+1. Print an error message: `invalid duration: '<value>'`
+2. Display command usage information
+3. Exit with code 1
+
+---
+
+## pomo break
+
+Start a Pomodoro break session immediately, skipping the work session.
+
+```bash
+pomo break [duration]
+```
+
+### Arguments
+
+<ParamField path="duration" type="string" optional>
+  Duration for the break session in Go duration format (e.g., `5m`, `15m`). If omitted, uses the `break.duration` value from your configuration file.
+</ParamField>
+
+### Examples
+
+```bash
+# Start break session with default duration (5 minutes)
+pomo break
+
+# Start 15 minute break session
+pomo break 15m
+
+# Start 30 second break (useful for testing)
+pomo break 30s
+```
+
+### Behavior
+
+- Immediately starts a break timer without requiring a work session first
+- Useful when you need a quick break or want to test break notifications
+- Follows same UI and notification behavior as regular break sessions
+
+---
+
+## pomo stats
+
+Display Pomodoro statistics and productivity metrics in an interactive terminal UI.
+
+```bash
+pomo stats
+```
+
+### Arguments
+
+This command accepts no arguments.
+
+### Behavior
+
+- Opens a full-screen terminal interface showing your Pomodoro history
+- Displays productivity metrics and session summaries
+- Statistics are tracked across all your Pomodoro sessions
+- Press `q` or `Ctrl+C` to exit the stats view
+
+### Examples
+
+```bash
+# View your Pomodoro statistics
+pomo stats
+```
+
+---
+
+## pomo --version
+
+Display the current version of Pomo.
+
+```bash
+pomo --version
+# or
+pomo -v
+```
+
+### Output
+
+Prints the version number in the format:
+```
+pomo version 1.1.1
+```
+
+---
+
+## Exit codes
+
+Pomo uses the following exit codes:
+
+| Code | Meaning |
+|------|----------|
+| 0 | Success - command completed normally |
+| 1 | Error - invalid arguments, config errors, or runtime failures |
+
+---
+
+## Duration format
+
+All duration arguments use Go's `time.ParseDuration` format:
+
+- `s` - seconds (e.g., `30s`)
+- `m` - minutes (e.g., `25m`)
+- `h` - hours (e.g., `1h`)
+- Combined formats (e.g., `1h30m`, `2h15m30s`)
+
+<Note>
+  Duration values must be valid Go duration strings. Invalid formats like `25` (missing unit) or `1.5h` (decimal hours) will cause an error.
+</Note>
+
+---
+
+## Environment variables
+
+<ParamField path="DEBUG" type="string" default="0">
+  Enable debug logging to `debug.log` file. Set to `1` to enable debug mode.
+  
+  ```bash
+  DEBUG=1 pomo 25m
+  ```
+</ParamField>
+
+---
+
+## Configuration file location
+
+Pomo searches for `pomo.yaml` in the following locations (in order):
+
+1. Current working directory
+2. `~/.config/pomo/pomo.yaml` (Linux/macOS)
+3. User config directory on other platforms
+
+If no config file is found, Pomo uses built-in default values.

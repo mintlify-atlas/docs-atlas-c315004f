@@ -1,0 +1,131 @@
+---
+title: Configuration overview
+description: Learn how Pomo finds and loads configuration files, and understand the basic structure of pomo.yaml
+---
+
+## Config file locations
+
+Pomo searches for its configuration file in the following order:
+
+1. **Current directory**: `pomo.yaml` (highest priority)
+2. **System config directory**:
+   - **Linux/macOS**: `~/.config/pomo/pomo.yaml`
+   - **Windows**: `%APPDATA%\pomo\pomo.yaml`
+3. **Built-in defaults** if no config file is found
+
+<Note>
+Pomo will use built-in default values if no config file is found. You can run Pomo without any configuration.
+</Note>
+
+## Configuration structure
+
+The `pomo.yaml` file uses YAML format to configure sessions, notifications, visual appearance, and post-session commands.
+
+### Complete example
+
+```yaml pomo.yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Bahaaio/pomo/main/config/schema.json
+# pomo config file
+# https://github.com/Bahaaio/pomo
+
+onSessionEnd: ask
+
+asciiArt:
+  enabled: true
+  font: mono12
+  color: "#5A56E0"
+
+work:
+  duration: 25m
+  title: work session
+  notification:
+    enabled: true
+    urgent: false
+    title: work finished 🎉
+    message: time to take a break
+    icon: ~/path/to/icon.png
+  then:
+    - [spd-say, "Time to take a break"]
+
+break:
+  duration: 5m
+  title: break session
+  notification:
+    enabled: true
+    urgent: false
+    title: break over 😴
+    message: back to work!
+    icon: ~/path/to/icon.png
+  then:
+    - [spd-say, "Back to work!"]
+
+longBreak:
+  enabled: true
+  after: 4
+  duration: 15m
+```
+
+## Session end behavior
+
+The `onSessionEnd` setting controls what happens when a session completes.
+
+<ParamField path="onSessionEnd" type="string" default="ask">
+  Action to take after session completion
+  
+  **Options:**
+  - `ask` - Prompt user to start next session (default)
+  - `start` - Automatically start the next session
+  - `quit` - Exit the application
+</ParamField>
+
+### Examples
+
+<CodeGroup>
+```yaml Ask user (default)
+onSessionEnd: ask
+```
+
+```yaml Auto-start next session
+onSessionEnd: start
+```
+
+```yaml Quit after session
+onSessionEnd: quit
+```
+</CodeGroup>
+
+<Tip>
+Use `ask` for maximum control, `start` for uninterrupted Pomodoro cycles, or `quit` if you only want to run single sessions.
+</Tip>
+
+## Config file validation
+
+Pomo includes a JSON schema for config file validation. Add this line at the top of your `pomo.yaml` for editor autocompletion:
+
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Bahaaio/pomo/main/config/schema.json
+```
+
+<Note>
+This enables YAML language server features like autocompletion and validation in editors like VS Code.
+</Note>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Session settings" icon="clock" href="/configuration/session-settings">
+    Configure work, break, and long break durations
+  </Card>
+  
+  <Card title="ASCII art" icon="font" href="/configuration/ascii-art">
+    Customize timer fonts and colors
+  </Card>
+  
+  <Card title="Notifications" icon="bell" href="/configuration/notifications">
+    Set up desktop notifications
+  </Card>
+  
+  <Card title="Commands" icon="terminal" href="/configuration/commands">
+    Run custom commands after sessions
+  </Card>
+</CardGroup>

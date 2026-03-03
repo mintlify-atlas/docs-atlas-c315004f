@@ -1,0 +1,188 @@
+---
+title: Keyboard shortcuts
+description: Complete reference for all keyboard shortcuts and keybindings in Pomo
+---
+
+Pomo provides keyboard shortcuts to control the timer and interact with dialogs. All keybindings are built-in and cannot be customized.
+
+## Timer controls
+
+These keybindings are available during active work or break sessions.
+
+| Key | Alternative | Action | Description |
+|-----|-------------|--------|-------------|
+| `↑` | `k` | Increase timer | Add 1 minute to the current session |
+| `←` | `h` | Reset timer | Reset the timer to its original duration |
+| `Space` | - | Pause/resume | Toggle between paused and running states |
+| `s` | - | Skip session | Skip to the end of the current session |
+| `q` | `Ctrl+C` | Quit | Exit the timer and return to shell |
+
+### Detailed behavior
+
+<Accordion title="Increase timer (↑ / k)">
+  Adds exactly 1 minute to the remaining time on the current session.
+  
+  - Can be pressed multiple times to add multiple minutes
+  - Works while timer is running or paused
+  - Does not affect the configured default duration for future sessions
+  - Useful when you need just a bit more time to finish a task
+  
+  **Example:** If timer shows 3:45 remaining, pressing `↑` changes it to 4:45.
+</Accordion>
+
+<Accordion title="Reset timer (← / h)">
+  Resets the countdown to the full session duration.
+  
+  - Returns timer to the original duration (either default or custom)
+  - Clears any time added with the increase key
+  - Works while timer is running or paused
+  - Does not restart the session - maintains current pause state
+  
+  **Example:** In a 25-minute session with 12:30 remaining, pressing `←` resets to 25:00.
+</Accordion>
+
+<Accordion title="Pause/resume (Space)">
+  Toggles the timer between running and paused states.
+  
+  - Pauses the countdown and preserves remaining time
+  - Press again to resume from where you left off
+  - Progress bar updates to show paused state
+  - Useful for unexpected interruptions
+  
+  **Visual indicator:** The UI will show "Paused" when the timer is stopped.
+</Accordion>
+
+<Accordion title="Skip session (s)">
+  Immediately completes the current session and triggers end-of-session behavior.
+  
+  - Jumps to 0:00 and marks session as complete
+  - Triggers desktop notification (if enabled)
+  - Shows session end dialog based on `onSessionEnd` configuration
+  - Statistics are recorded as if session completed naturally
+  
+  **Use case:** When you finish a task early and want to start your break immediately.
+</Accordion>
+
+<Accordion title="Quit (q / Ctrl+C)">
+  Exits Pomo and returns to your shell.
+  
+  - Terminates the current session without saving
+  - No notification is sent
+  - Session is not recorded in statistics
+  - Clean exit with no confirmation prompt
+  
+  **Note:** Use skip (`s`) instead if you want the session to count toward your stats.
+</Accordion>
+
+---
+
+## Confirmation dialog
+
+These keybindings appear in the session-end confirmation dialog when `onSessionEnd` is set to `ask`.
+
+| Key | Alternative | Action | Description |
+|-----|-------------|--------|-------------|
+| `Tab` | `h`, `l`, `←`, `→` | Toggle selection | Switch between Yes/No options |
+| `y` | - | Confirm | Select "Yes" and submit |
+| `n` | - | Cancel | Select "No" and submit |
+| `Enter` | - | Submit | Submit the currently selected option |
+| `s` | - | Short session | Start a short break session |
+| `q` | `Ctrl+C` | Quit | Exit without starting next session |
+
+### Detailed behavior
+
+<Accordion title="Toggle selection (Tab / h / l / ← / →)">
+  Moves the selection between the "Yes" and "No" options in the dialog.
+  
+  - Visual highlight moves between options
+  - Multiple keys provide flexibility for different keyboard layouts
+  - Vi-style keys (`h`/`l`) and arrow keys both supported
+  
+  **Dialog context:** Appears after work sessions asking "Start break?"
+</Accordion>
+
+<Accordion title="Confirm (y)">
+  Immediately selects "Yes" and proceeds to the next session.
+  
+  - Bypasses need to navigate and press Enter
+  - After work session: starts break
+  - After break session: starts work
+  - Respects break duration settings
+  
+  **Quick workflow:** Press `y` to immediately start your break after work.
+</Accordion>
+
+<Accordion title="Cancel (n)">
+  Immediately selects "No" and exits the timer.
+  
+  - Bypasses need to navigate and press Enter
+  - Closes Pomo and returns to shell
+  - Session is still recorded in statistics
+  
+  **Quick workflow:** Press `n` to quickly exit after completing a session.
+</Accordion>
+
+<Accordion title="Submit (Enter)">
+  Confirms the currently highlighted option (Yes or No).
+  
+  - Executes the action for whichever option is selected
+  - Use after navigating with Tab/arrows
+  - Standard confirmation key
+  
+  **Example:** Press `Tab` to select "No", then `Enter` to confirm.
+</Accordion>
+
+<Accordion title="Short session (s)">
+  Starts a short break session regardless of the selected option.
+  
+  - Immediately launches a break with reduced duration
+  - Useful when you don't need a full break
+  - Duration determined by break configuration
+  
+  **Note:** This is distinct from the normal "Yes" option and may use different duration.
+</Accordion>
+
+<Accordion title="Quit (q / Ctrl+C)">
+  Exits Pomo without starting the next session.
+  
+  - Immediately closes the dialog and returns to shell
+  - Completed session is still saved to statistics
+  - Same as selecting "No" but faster
+  
+  **Quick exit:** Press `q` to immediately exit after reviewing session results.
+</Accordion>
+
+---
+
+## Keybinding design
+
+<Note>
+  Pomo's keybindings are designed to be accessible to both:
+  - **Vi/Vim users**: `h`, `j`, `k`, `l` for navigation
+  - **Arrow key users**: Standard arrow key support
+  - **Universal keys**: `Space`, `Enter`, `q`, `Ctrl+C` work for everyone
+</Note>
+
+---
+
+## Context-specific keys
+
+Some keys behave differently depending on where you are in Pomo:
+
+| Key | During session | In confirmation dialog |
+|-----|----------------|------------------------|
+| `s` | Skip session | Start short session |
+| `q` | Quit Pomo | Exit without continuing |
+| `Space` | Pause/resume | No effect |
+| `Enter` | No effect | Submit selection |
+
+---
+
+## Implementation details
+
+Keybindings are implemented using the [Bubble Tea](https://github.com/charmbracelet/bubbletea) framework:
+
+- **Timer keys**: Defined in `ui/keys.go:29-50`
+- **Dialog keys**: Defined in `ui/confirm/keys.go:29-54`
+- Keys are handled by the Bubble Tea `Update` message loop
+- No configuration file options to customize keybindings

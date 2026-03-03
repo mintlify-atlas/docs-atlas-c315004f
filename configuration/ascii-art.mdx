@@ -1,0 +1,199 @@
+---
+title: ASCII art customization
+description: Customize the ASCII art timer display with different fonts and colors
+---
+
+## ASCII art settings
+
+Pomo displays the countdown timer using large ASCII art fonts. You can customize the font style, color, or disable it entirely.
+
+<ParamField path="asciiArt.enabled" type="boolean" default="true">
+  Enable or disable ASCII art timer display
+  
+  When disabled, shows a simple text-based timer
+</ParamField>
+
+<ParamField path="asciiArt.font" type="string" default="mono12">
+  Font style for the ASCII art timer
+  
+  **Available fonts:**
+  - `mono12` - Blocky monospace font (default)
+  - `rebel` - Bold font with gradient shading
+  - `ansi` - Clean, simple ANSI font
+  - `ansiShadow` - ANSI font with box-drawing characters
+</ParamField>
+
+<ParamField path="asciiArt.color" type="string" default="#5A56E0">
+  Color of the ASCII art timer in hex format
+  
+  Use 6-digit hex color codes like `#5A56E0` or `#FF4C4C`
+</ParamField>
+
+### Basic example
+
+```yaml pomo.yaml
+asciiArt:
+  enabled: true
+  font: mono12
+  color: "#5A56E0"
+```
+
+## Available fonts
+
+Pomo includes four built-in ASCII art fonts, each with a unique style.
+
+<AccordionGroup>
+  <Accordion title="mono12 (default)" icon="font">
+    Blocky monospace font with clean, readable characters.
+    
+    ```yaml
+    asciiArt:
+      font: mono12
+      color: "#5A56E0"
+    ```
+    
+    **Best for:** Default choice, good readability and terminal compatibility
+  </Accordion>
+  
+  <Accordion title="rebel" icon="font">
+    Bold font with gradient shading using extended ASCII characters.
+    
+    ```yaml
+    asciiArt:
+      font: rebel
+      color: "#8860FF"
+    ```
+    
+    **Best for:** Eye-catching display, modern terminals with good Unicode support
+  </Accordion>
+  
+  <Accordion title="ansi" icon="font">
+    Clean, simple ANSI font with block characters.
+    
+    ```yaml
+    asciiArt:
+      font: ansi
+      color: "#F25D94"
+    ```
+    
+    **Best for:** Minimalist look, maximum compatibility
+  </Accordion>
+  
+  <Accordion title="ansiShadow" icon="font">
+    ANSI font using box-drawing characters for a shadowed effect.
+    
+    ```yaml
+    asciiArt:
+      font: ansiShadow
+      color: "#4A9EFF"
+    ```
+    
+    **Best for:** Stylish appearance with good terminal support
+  </Accordion>
+</AccordionGroup>
+
+## Color customization
+
+The timer color uses 6-digit hex color codes. Here are some examples:
+
+<CodeGroup>
+```yaml Purple (default)
+asciiArt:
+  color: "#5A56E0"
+```
+
+```yaml Pink
+asciiArt:
+  color: "#F25D94"
+```
+
+```yaml Blue
+asciiArt:
+  color: "#4A9EFF"
+```
+
+```yaml Green
+asciiArt:
+  color: "#198754"
+```
+
+```yaml Red
+asciiArt:
+  color: "#FF4C4C"
+```
+
+```yaml Orange
+asciiArt:
+  color: "#FF8C42"
+```
+</CodeGroup>
+
+<Warning>
+Color codes must be in 6-digit hex format with a `#` prefix. Invalid colors will fall back to the terminal's default color.
+</Warning>
+
+### Color format rules
+
+- **Valid:** `#5A56E0`, `#FF4C4C`, `#198754`
+- **Invalid:** `#F00` (too short), `5A56E0` (missing #), `purple` (named colors not supported)
+
+## Disabling ASCII art
+
+If you prefer a minimal display, you can disable ASCII art entirely:
+
+```yaml pomo.yaml
+asciiArt:
+  enabled: false
+```
+
+When disabled, Pomo shows a simple text-based timer instead of large ASCII art.
+
+<Tip>
+Disabling ASCII art can be useful for smaller terminal windows or when running Pomo in the background.
+</Tip>
+
+## Font examples
+
+Here's how different fonts look with various colors:
+
+<CodeGroup>
+```yaml mono12 - Indigo
+asciiArt:
+  enabled: true
+  font: mono12
+  color: "#5A56E0"
+```
+
+```yaml rebel - Purple
+asciiArt:
+  enabled: true
+  font: rebel
+  color: "#8860FF"
+```
+
+```yaml ansi - Pink
+asciiArt:
+  enabled: true
+  font: ansi
+  color: "#F25D94"
+```
+
+```yaml ansiShadow - Blue
+asciiArt:
+  enabled: true
+  font: ansiShadow
+  color: "#4A9EFF"
+```
+</CodeGroup>
+
+## Terminal compatibility
+
+All fonts work in most modern terminals. However:
+
+- **mono12** and **ansi** - Maximum compatibility, use basic block characters
+- **rebel** - Requires Unicode support for gradient characters (`▒`, `░`)
+- **ansiShadow** - Requires box-drawing character support (`╔`, `═`, `║`)
+
+<Note>
+If characters don't display correctly, your terminal may not support the required Unicode characters. Try switching to `mono12` or `ansi` for better compatibility.
+</Note>

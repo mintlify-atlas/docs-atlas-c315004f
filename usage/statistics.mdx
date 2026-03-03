@@ -1,0 +1,242 @@
+---
+title: Statistics
+description: Track and analyze your productivity with detailed Pomodoro statistics
+---
+
+Pomo tracks all your work and break sessions, providing insights into your productivity patterns.
+
+## Viewing statistics
+
+Display your productivity statistics:
+
+```bash
+pomo stats
+```
+
+This opens a full-screen terminal UI showing:
+
+- Duration ratio (work vs break time)
+- Current and best streaks
+- Weekly bar chart (last 7 days)
+- 4-month activity heatmap
+
+<Note>
+Press `q` or `Ctrl+C` to exit the statistics view.
+</Note>
+
+## Duration ratio
+
+The duration ratio shows your total work time versus break time as a visual bar:
+
+```
+1h30m                      45m
+████████████████████░░░░░░░░░░
+66%                        34%
+```
+
+- **Left side**: Total work duration and percentage
+- **Right side**: Total break duration and percentage
+- **Colored bar**: Visual representation of the ratio
+
+This helps you understand if you're taking enough breaks or working too much.
+
+## Streak tracking
+
+Pomo tracks your daily work streaks:
+
+- **Current streak**: Consecutive days with at least one work session
+- **Best streak**: Your longest streak ever recorded
+
+Streaks motivate consistent daily practice and help build productive habits.
+
+## Weekly bar chart
+
+The bar chart displays your work hours for the last 7 days:
+
+```
+2h  ┤
+    │
+1h  ┤     █
+    │     █
+    │ █   █   █
+30m ┤ █   █   █
+    │ █   █ █ █
+ 0  └─────────────
+    Mon Tue Wed Thu Fri Sat Sun
+```
+
+### Chart features
+
+- **Y-axis**: Work duration with dynamic scaling
+- **X-axis**: Days of the week (3-letter abbreviations)
+- **Bars**: Height represents total work time for each day
+- **Auto-scaling**: Y-axis adjusts based on your maximum daily work time
+
+<Tip>
+The bar chart helps identify your most productive days and patterns in your work schedule.
+</Tip>
+
+## 4-month heatmap
+
+A GitHub-style activity heatmap shows your work distribution over the last 4 months:
+
+```
+     Nov        Dec        Jan        Feb
+─────────────────────────────────────────
+Sun │ 󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻 
+Mon │ 󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻 
+Tue │ 󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻 
+Wed │ 󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻 
+Thu │ 󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻 
+Fri │ 󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻 
+Sat │ 󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻   󱓻 󱓻 󱓻 󱓻 
+
+Less 󱓻 󱓻 󱓻 󱓻 󱓻  More
+```
+
+### Heatmap color intensity
+
+The heatmap uses 5 color levels to represent daily work duration:
+
+| Color | Work Duration |
+| ----- | ------------- |
+| Level 0 | No work (< 1 second) |
+| Level 1 | Light work (1s - 30m) |
+| Level 2 | Moderate work (30m - 1h) |
+| Level 3 | Good work (1h - 2h) |
+| Level 4 | Intense work (> 2h) |
+
+<Warning>
+**Nerd Font required**: The heatmap uses the icon `󱓻` which requires a [Nerd Font](https://www.nerdfonts.com/) to display correctly. Without it, you'll see empty boxes or question marks.
+</Warning>
+
+### Heatmap layout
+
+- **Columns**: Each column represents one week
+- **Rows**: Each row represents a day of the week (Sunday through Saturday)
+- **Months**: The last 4 months are displayed, labeled at the top
+- **Current date**: The heatmap stops at today (future dates are blank)
+
+## Data storage
+
+Pomo stores session data in a SQLite database:
+
+### Database schema
+
+```sql
+CREATE TABLE sessions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  type TEXT NOT NULL,          -- "work" or "break"
+  duration INTEGER NOT NULL,   -- Duration in nanoseconds
+  started_at TEXT NOT NULL     -- ISO 8601 timestamp
+);
+```
+
+### Session types
+
+- `work`: Work sessions started with `pomo` or `pomo [duration]`
+- `break`: Break sessions started with `pomo break` or automatically after work
+
+### Database location
+
+The database is stored in your system's data directory:
+
+- **Linux/macOS**: `~/.local/share/pomo/pomo.db`
+- **Windows**: `%LOCALAPPDATA%\pomo\pomo.db`
+
+<Tip>
+All statistics are calculated from this database. Your session history persists across pomo updates.
+</Tip>
+
+## Statistics models
+
+Pomo calculates several types of statistics from your session data:
+
+### All-time stats
+
+```go db/models.go
+type AllTimeStats struct {
+    TotalSessions      int           // Total work + break sessions
+    TotalWorkDuration  time.Duration // Sum of all work sessions
+    TotalBreakDuration time.Duration // Sum of all break sessions
+}
+```
+
+### Daily stats
+
+```go db/models.go
+type DailyStat struct {
+    Date         string        // Format: "2006-01-02"
+    WorkDuration time.Duration // Total work time for this day
+}
+```
+
+### Streak stats
+
+```go db/models.go
+type StreakStats struct {
+    Current int  // Current consecutive days with work sessions
+    Best    int  // Longest streak ever achieved
+}
+```
+
+## Understanding your metrics
+
+### Duration ratio insights
+
+- **Ideal ratio**: Aim for 80-85% work, 15-20% breaks
+- **Too high work %**: You might be skipping breaks and risking burnout
+- **Too high break %**: Consider longer focused work sessions
+
+### Weekly bar chart patterns
+
+- **Consistent bars**: Good daily work habit
+- **Gaps**: Days without work sessions (identify blockers)
+- **Spikes**: Very productive days (what made them different?)
+
+### Heatmap insights
+
+- **Dark squares**: Consistently productive days
+- **Light squares**: Light work days (meetings, planning, etc.)
+- **Blank squares**: Days off or no tracked work
+- **Patterns**: Identify weekly rhythms and seasonal trends
+
+## Privacy
+
+All statistics are stored **locally** on your machine:
+
+- No data is sent to external servers
+- No analytics or tracking
+- Full control over your productivity data
+
+<Note>
+You can delete the database file at any time to reset your statistics. Pomo will create a new database on the next session.
+</Note>
+
+## Examples
+
+### Quick stats check
+
+```bash
+pomo stats
+```
+
+View your full statistics dashboard.
+
+### After a productive week
+
+Run `pomo stats` to see:
+- Your weekly bar chart showing consistent daily work
+- Updated streak if you've worked every day
+- Updated heatmap with darker squares for recent days
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Work sessions" icon="laptop-code" href="/usage/work-sessions">
+    Start work sessions to build your stats
+  </Card>
+  <Card title="Break sessions" icon="mug-hot" href="/usage/break-sessions">
+    Manage breaks and maintain balance
+  </Card>
+</CardGroup>

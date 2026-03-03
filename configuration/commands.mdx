@@ -1,0 +1,360 @@
+---
+title: Custom commands
+description: Run custom commands automatically when sessions complete using the then field
+---
+
+## The then field
+
+The `then` field allows you to run custom commands when work or break sessions complete. This is useful for playing sounds, triggering scripts, or integrating with other tools.
+
+<ParamField path="then" type="array">
+  List of commands to run after session completion
+  
+  Each command is specified as an array: `[command, arg1, arg2, ...]`
+</ParamField>
+
+### Basic syntax
+
+```yaml pomo.yaml
+work:
+  duration: 25m
+  then:
+    - [command, arg1, arg2]
+    - [another-command, arg]
+
+break:
+  duration: 5m
+  then:
+    - [command, arg]
+```
+
+<Note>
+Commands are specified as arrays, not strings. Use `[spd-say, "Hello"]` instead of `"spd-say Hello"`.
+</Note>
+
+## Command execution behavior
+
+### Timeout
+
+All commands run with a **5-second timeout**. If a command takes longer than 5 seconds, it will be terminated.
+
+```go Source: actions/actions.go:15
+var CommandTimeout = 5 * time.Second
+```
+
+<Warning>
+Commands that take longer than 5 seconds will be killed. Use background processes or scripts for long-running tasks.
+</Warning>
+
+### Auto-cancellation
+
+Commands are automatically cancelled when you start the next session. This prevents sound notifications or scripts from running after you've moved on.
+
+<Tip>
+If you skip to the next session or start a new one before commands complete, they will be cancelled automatically.
+</Tip>
+
+### Execution order
+
+Multiple commands in the `then` array run sequentially in the order specified:
+
+```yaml pomo.yaml
+work:
+  then:
+    - [echo, "Work done"]      # Runs first
+    - [spd-say, "Take a break"] # Runs second
+    - [notify-send, "Break time!"] # Runs third
+```
+
+## Sound notifications
+
+Play sounds when sessions complete using platform-specific audio commands.
+
+<AccordionGroup>
+  <Accordion title="Linux" icon="linux">
+    Use `paplay` (PulseAudio) or `spd-say` (speech dispatcher):
+    
+    ```yaml
+    work:
+      then:
+        - [paplay, ~/sounds/work-done.mp3]
+    
+    break:
+      then:
+        - [paplay, ~/sounds/break-over.mp3]
+    ```
+    
+    Or use text-to-speech:
+    
+    ```yaml
+    work:
+      then:
+        - [spd-say, "Time to take a break"]
+    
+    break:
+      then:
+        - [spd-say, "Back to work!"]
+    ```
+  </Accordion>
+  
+  <Accordion title="macOS" icon="apple">
+    Use `afplay` (built-in audio player) or `say` (text-to-speech):
+    
+    ```yaml
+    work:
+      then:
+        - [afplay, ~/sounds/work-done.mp3]
+    
+    break:
+      then:
+        - [afplay, ~/sounds/break-over.mp3]
+    ```
+    
+    Or use text-to-speech:
+    
+    ```yaml
+    work:
+      then:
+        - [say, "Time for a break"]
+    
+    break:
+      then:
+        - [say, "Back to work"]
+    ```
+  </Accordion>
+  
+  <Accordion title="Windows" icon="windows">
+    Use PowerShell to play sounds:
+    
+    ```yaml
+    work:
+      then:
+        - [powershell, start, work-done.mp3]
+    
+    break:
+      then:
+        - [powershell, start, break-over.mp3]
+    ```
+    
+    Or use Windows speech:
+    
+    ```yaml
+    work:
+      then:
+        - [powershell, "Add-Type -AssemblyName System.Speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak('Time for a break')"]
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Example configurations
+
+<CodeGroup>
+```yaml Text-to-speech (Linux)
+work:
+  duration: 25m
+  then:
+    - [spd-say, "Time to take a break"]
+
+break:
+  duration: 5m
+  then:
+    - [spd-say, "Back to work!"]
+```
+
+```yaml Sound files (macOS)
+work:
+  duration: 25m
+  then:
+    - [afplay, ~/sounds/bell.mp3]
+
+break:
+  duration: 5m
+  then:
+    - [afplay, ~/sounds/chime.mp3]
+```
+
+```yaml PowerShell (Windows)
+work:
+  duration: 25m
+  then:
+    - [powershell, start, work-done.mp3]
+
+break:
+  duration: 5m
+  then:
+    - [powershell, start, break-over.mp3]
+```
+
+```yaml Multiple commands
+work:
+  duration: 25m
+  then:
+    - [notify-send, "Work done"]
+    - [paplay, ~/sounds/bell.mp3]
+    - [echo, "Session completed"]  # Logs to terminal
+
+break:
+  duration: 5m
+  then:
+    - [notify-send, "Break over"]
+    - [paplay, ~/sounds/chime.mp3]
+```
+</CodeGroup>
+
+## Custom scripts
+
+Run custom scripts when sessions complete:
+
+```yaml pomo.yaml
+work:
+  then:
+    - [/home/user/scripts/work-done.sh]
+
+break:
+  then:
+    - [/home/user/scripts/break-over.sh]
+```
+
+### Example script
+
+```bash work-done.sh
+#!/bin/bash
+
+# Play a sound
+paplay ~/sounds/bell.mp3
+
+# Send a notification
+notify-send "Work Session Complete" "Time for a break!"
+
+# Log to file
+echo "$(date): Work session completed" >> ~/pomo.log
+
+# Post to webhook (optional)
+curl -X POST https://your-webhook.com/work-done
+```
+
+Make the script executable:
+
+```bash Terminal
+chmod +x ~/scripts/work-done.sh
+```
+
+<Warning>
+Scripts must complete within 5 seconds or they will be terminated. For longer tasks, use background processes (`&`) or `nohup`.
+</Warning>
+
+## Integration examples
+
+<AccordionGroup>
+  <Accordion title="Slack notification" icon="slack">
+    Send a Slack message when sessions complete:
+    
+    ```yaml
+    work:
+      then:
+        - [curl, -X, POST, -H, "Content-Type: application/json", -d, '{"text":"Work session complete!"}', https://hooks.slack.com/services/YOUR/WEBHOOK/URL]
+    ```
+    
+    Or use a script:
+    
+    ```bash notify-slack.sh
+    #!/bin/bash
+    curl -X POST -H 'Content-Type: application/json' \
+      -d '{"text":"Work session complete!"}' \
+      https://hooks.slack.com/services/YOUR/WEBHOOK/URL
+    ```
+  </Accordion>
+  
+  <Accordion title="Smart home integration" icon="house-signal">
+    Control smart lights or devices:
+    
+    ```yaml
+    work:
+      then:
+        - [curl, -X, POST, http://192.168.1.100/api/lights/1/on]
+    
+    break:
+      then:
+        - [curl, -X, POST, http://192.168.1.100/api/lights/1/dim]
+    ```
+  </Accordion>
+  
+  <Accordion title="Logging and analytics" icon="chart-line">
+    Log session completion:
+    
+    ```bash log-session.sh
+    #!/bin/bash
+    echo "$(date '+%Y-%m-%d %H:%M:%S'): $1 session completed" >> ~/pomo-log.txt
+    ```
+    
+    ```yaml
+    work:
+      then:
+        - [/home/user/scripts/log-session.sh, work]
+    
+    break:
+      then:
+        - [/home/user/scripts/log-session.sh, break]
+    ```
+  </Accordion>
+  
+  <Accordion title="System actions" icon="computer">
+    Perform system actions:
+    
+    ```yaml
+    work:
+      then:
+        # Increase screen brightness
+        - [brightnessctl, set, 100%]
+    
+    break:
+      then:
+        # Dim screen brightness
+        - [brightnessctl, set, 50%]
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Error handling
+
+If a command fails, Pomo logs the error but continues execution:
+
+```bash
+failed to run command '["spd-say" "Hello"]': exit status 1
+```
+
+<Note>
+Command failures don't stop Pomo. Check terminal logs if commands aren't working as expected.
+</Note>
+
+## Debugging commands
+
+Test commands manually before adding them to your config:
+
+```bash Terminal
+# Test text-to-speech
+spd-say "Time to take a break"
+
+# Test audio playback
+paplay ~/sounds/bell.mp3
+
+# Test script execution
+/home/user/scripts/work-done.sh
+```
+
+<Tip>
+Run commands in your terminal first to ensure they work before adding them to `pomo.yaml`.
+</Tip>
+
+## Best practices
+
+1. **Keep commands short** - Remember the 5-second timeout
+2. **Use absolute paths** - Avoid relying on `$PATH` or relative paths
+3. **Test commands first** - Run them manually before adding to config
+4. **Use scripts for complex tasks** - Move multi-step logic to separate scripts
+5. **Handle errors gracefully** - Commands may fail; don't rely on them completing
+6. **Use background processes** - For tasks that should continue after Pomo starts the next session
+
+<Warning>
+Avoid commands that require user input or interaction. They will block until the 5-second timeout.
+</Warning>

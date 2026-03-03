@@ -1,0 +1,304 @@
+---
+title: Custom commands
+description: Advanced automation with custom command execution after sessions
+---
+
+The `then` field in Pomo's configuration allows you to run arbitrary commands when sessions complete. This enables powerful automation workflows beyond simple sound notifications.
+
+## Basic syntax
+
+The `then` field accepts an array of commands. Each command is itself an array where:
+- First element: executable name or path
+- Remaining elements: command arguments
+
+```yaml
+work:
+  then:
+    - [command1, arg1, arg2]
+    - [command2, arg1]
+```
+
+<Note>
+  All commands in the `then` array run in **parallel** as separate goroutines (see `actions/actions.go:27-29`).
+</Note>
+
+## Multiple commands example
+
+You can chain multiple actions together:
+
+```yaml
+work:
+  duration: 25m
+  then:
+    # Play a sound
+    - [paplay, ~/sounds/complete.wav]
+    # Speak a message
+    - [spd-say, "Work session complete"]
+    # Log to a file
+    - [sh, -c, "echo $(date): Work session completed >> ~/pomo.log"]
+
+break:
+  duration: 5m
+  then:
+    - [paplay, ~/sounds/break-over.wav]
+    - [notify-send, "Pomo", "Break time is over!"]
+```
+
+## Advanced use cases
+
+### Integration with external services
+
+Send webhooks or API calls when sessions complete:
+
+```yaml
+work:
+  then:
+    # Send a webhook to Zapier/IFTTT
+    - [curl, -X, POST, "https://maker.ifttt.com/trigger/pomo_complete/with/key/YOUR_KEY"]
+    
+    # Post to Slack
+    - [curl, -X, POST, "-H", "Content-Type: application/json", "-d", '{"text":"Completed a Pomodoro!"}', "YOUR_SLACK_WEBHOOK"]
+```
+
+### Logging and analytics
+
+Track your productivity automatically:
+
+```yaml
+work:
+  then:
+    # Append to CSV log
+    - [sh, -c, "echo $(date +%Y-%m-%d,%H:%M:%S),work,25 >> ~/productivity.csv"]
+    
+    # Update a counter file
+    - [sh, -c, "expr $(cat ~/pomo_count.txt) + 1 > ~/pomo_count.txt"]
+```
+
+### Smart home integration
+
+Control IoT devices based on your work sessions:
+
+```yaml
+work:
+  then:
+    # Turn on smart lights (using Home Assistant)
+    - [curl, -X, POST, "-H", "Authorization: Bearer YOUR_TOKEN", "-H", "Content-Type: application/json", "-d", '{"entity_id":"light.desk"}', "http://homeassistant.local:8123/api/services/light/turn_on"]
+
+break:
+  then:
+    # Dim the lights
+    - [curl, -X, POST, "-H", "Authorization: Bearer YOUR_TOKEN", "-H", "Content-Type: application/json", "-d", '{"entity_id":"light.desk","brightness":100}', "http://homeassistant.local:8123/api/services/light/turn_on"]
+```
+
+### Task management integration
+
+Update your task tracker:
+
+```yaml
+work:
+  then:
+    # Add time entry to Toggl
+    - [python3, ~/scripts/toggl_track.py, "--duration", "25"]
+    
+    # Update Notion database
+    - [node, ~/scripts/notion-update.js]
+```
+
+### Custom scripts
+
+Run your own automation scripts:
+
+```yaml
+work:
+  then:
+    - [python3, ~/scripts/backup_notes.py]
+    - [bash, ~/scripts/git_commit_work.sh]
+
+break:
+  then:
+    - [python3, ~/scripts/stretch_reminder.py]
+```
+
+## Execution model
+
+### Parallel execution
+
+All commands run simultaneously in separate goroutines:
+
+```go
+// From actions/actions.go:27-29
+wg.Go(func() {
+    runPostCommands(ctx, task.Then)
+})
+```
+
+This means if you have multiple commands, they don't wait for each other:
+
+```yaml
+then:
+  - [sleep, "3"]  # Starts immediately
+  - [echo, "Hello"]  # Also starts immediately, doesn't wait for sleep
+```
+
+### Command timeout
+
+<Warning>
+  Each command has a **5-second timeout** (defined in `actions/actions.go:15`). Commands exceeding this limit are automatically terminated.
+</Warning>
+
+```go
+var CommandTimeout = 5 * time.Second
+```
+
+For long-running tasks, consider:
+- Running them in the background with `&`
+- Using `nohup` to detach from the parent process
+- Triggering a background service instead of running directly
+
+### Context cancellation
+
+Commands are cancelled when the next session starts:
+
+```go
+// From actions/actions.go:69
+c := exec.CommandContext(ctx, cmd[0], cmd[1:]...)
+```
+
+When you start a new session, the context is cancelled and all running commands receive a termination signal.
+
+## Error handling
+
+If a command fails, Pomo logs the error but continues execution:
+
+```go
+// From actions/actions.go:71-74
+if err := c.Run(); err != nil {
+    log.Printf("failed to run command '%q': %v\n", cmd, err)
+}
+```
+
+<Tip>
+  Enable debug logging to see command execution details:
+  
+  ```bash
+  DEBUG=1 pomo 25m
+  ```
+  
+  Check `debug.log` for command output and errors.
+</Tip>
+
+## Shell commands and pipes
+
+To use shell features like pipes, redirects, or environment variables, invoke a shell:
+
+```yaml
+work:
+  then:
+    # Use sh -c for shell features
+    - [sh, -c, "echo 'Work done' | tee -a ~/pomo.log"]
+    
+    # Or bash for bash-specific features
+    - [bash, -c, "source ~/.bashrc && my_custom_function"]
+    
+    # Windows: use PowerShell
+    - [powershell, -Command, "Get-Date | Out-File -Append pomo.log"]
+```
+
+## Best practices
+
+<Steps>
+  <Step title="Test commands manually first">
+    Always test your commands in the terminal before adding them to config:
+    
+    ```bash
+    paplay ~/sounds/bell.wav
+    curl -X POST "https://api.example.com/webhook"
+    ```
+  </Step>
+  
+  <Step title="Keep commands fast">
+    Remember the 5-second timeout. For longer tasks, trigger background processes:
+    
+    ```yaml
+    then:
+      - [sh, -c, "nohup ~/long-script.sh &"]
+    ```
+  </Step>
+  
+  <Step title="Handle errors gracefully">
+    Use shell error handling if needed:
+    
+    ```yaml
+    then:
+      - [sh, -c, "command || echo 'Failed' >> ~/errors.log"]
+    ```
+  </Step>
+  
+  <Step title="Use absolute paths">
+    Prefer absolute paths or `~/` for home directory:
+    
+    ```yaml
+    # ✅ Good
+    - [python3, ~/scripts/my_script.py]
+    
+    # ❌ Avoid
+    - [python3, scripts/my_script.py]
+    ```
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<Accordion title="Command not found">
+  Ensure the executable is in your PATH or use absolute paths:
+  
+  ```bash
+  # Find the full path
+  which paplay
+  # Output: /usr/bin/paplay
+  ```
+  
+  Then use the full path:
+  
+  ```yaml
+  then:
+    - [/usr/bin/paplay, ~/sounds/bell.wav]
+  ```
+</Accordion>
+
+<Accordion title="Command runs but doesn't work">
+  Enable debug logging to see what's happening:
+  
+  ```bash
+  DEBUG=1 pomo 25m
+  ```
+  
+  Check `debug.log` in the current directory for detailed execution logs.
+</Accordion>
+
+<Accordion title="Syntax errors in YAML">
+  Common mistakes:
+  
+  ```yaml
+  # ❌ Wrong - missing outer array
+  then: [echo, hello]
+  
+  # ✅ Correct - array of command arrays
+  then:
+    - [echo, hello]
+  
+  # ❌ Wrong - string instead of array
+  then:
+    - "echo hello"
+  
+  # ✅ Correct - command array
+  then:
+    - [echo, hello]
+  ```
+</Accordion>
+
+## Related topics
+
+- [Sound notifications](/advanced/sound-notifications) - Audio notification setup
+- [Configuration overview](/configuration/overview) - Full configuration reference
+- [Troubleshooting](/advanced/troubleshooting) - Common issues and solutions

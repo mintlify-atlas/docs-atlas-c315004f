@@ -1,0 +1,184 @@
+---
+title: Session settings
+description: Configure work sessions, breaks, and long breaks with custom durations and titles
+---
+
+## Work session
+
+Work sessions are the focused work periods in your Pomodoro cycle.
+
+<ParamField path="work.duration" type="duration" default="25m">
+  Length of work sessions
+  
+  Supports duration formats: `25m`, `1h30m`, `90s`
+</ParamField>
+
+<ParamField path="work.title" type="string" default="work session">
+  Display title for work sessions
+  
+  Shown in the terminal UI during the session
+</ParamField>
+
+### Example
+
+```yaml pomo.yaml
+work:
+  duration: 25m
+  title: work session
+```
+
+## Break session
+
+Short breaks between work sessions for quick rest.
+
+<ParamField path="break.duration" type="duration" default="5m">
+  Length of break sessions
+  
+  Supports duration formats: `5m`, `10m`, `300s`
+</ParamField>
+
+<ParamField path="break.title" type="string" default="break session">
+  Display title for break sessions
+  
+  Shown in the terminal UI during the session
+</ParamField>
+
+### Example
+
+```yaml pomo.yaml
+break:
+  duration: 5m
+  title: break session
+```
+
+## Long break
+
+Longer breaks after completing multiple work sessions.
+
+<ParamField path="longBreak.enabled" type="boolean" default="true">
+  Enable long breaks after a set number of work sessions
+</ParamField>
+
+<ParamField path="longBreak.after" type="integer" default="4">
+  Number of work sessions before triggering a long break
+  
+  Must be greater than 0. Defaults to 4 if invalid.
+</ParamField>
+
+<ParamField path="longBreak.duration" type="duration" default="15m">
+  Length of long break sessions
+  
+  Typically longer than regular breaks for extended rest
+</ParamField>
+
+### Example
+
+```yaml pomo.yaml
+longBreak:
+  enabled: true
+  after: 4      # Long break after 4 work sessions
+  duration: 15m
+```
+
+<Note>
+Long breaks are automatically inserted after the configured number of work sessions. If you complete 4 work sessions, the next break will be a long break instead of a regular break.
+</Note>
+
+## Duration format
+
+Pomo accepts flexible duration formats:
+
+<AccordionGroup>
+  <Accordion title="Minutes">
+    ```yaml
+    duration: 25m
+    duration: 5m
+    ```
+  </Accordion>
+  
+  <Accordion title="Hours and minutes">
+    ```yaml
+    duration: 1h30m
+    duration: 2h
+    ```
+  </Accordion>
+  
+  <Accordion title="Seconds">
+    ```yaml
+    duration: 90s
+    duration: 300s
+    ```
+  </Accordion>
+  
+  <Accordion title="Mixed formats">
+    ```yaml
+    duration: 1h25m30s
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Common configurations
+
+<CodeGroup>
+```yaml Classic Pomodoro
+work:
+  duration: 25m
+  title: work session
+
+break:
+  duration: 5m
+  title: break session
+
+longBreak:
+  enabled: true
+  after: 4
+  duration: 15m
+```
+
+```yaml Extended sessions
+work:
+  duration: 50m
+  title: deep work
+
+break:
+  duration: 10m
+  title: rest break
+
+longBreak:
+  enabled: true
+  after: 3
+  duration: 30m
+```
+
+```yaml Short sprints
+work:
+  duration: 15m
+  title: sprint
+
+break:
+  duration: 3m
+  title: quick break
+
+longBreak:
+  enabled: false
+```
+</CodeGroup>
+
+<Tip>
+The classic Pomodoro Technique uses 25-minute work sessions with 5-minute breaks, and a longer 15-minute break after 4 sessions. Experiment with different durations to find what works best for you.
+</Tip>
+
+## Overriding via CLI
+
+You can override session durations from the command line:
+
+```bash Terminal
+pomo              # Use config defaults
+pomo 30m          # 30-minute work session
+pomo 45m 15m      # 45-minute work with 15-minute break
+pomo break 10m    # 10-minute break session
+```
+
+<Note>
+CLI arguments override config file settings for that session only. Your `pomo.yaml` file remains unchanged.
+</Note>

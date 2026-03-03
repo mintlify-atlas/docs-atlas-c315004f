@@ -1,0 +1,293 @@
+---
+title: Desktop notifications
+description: Configure cross-platform desktop notifications for session completion
+---
+
+## Notification settings
+
+Pomo sends native desktop notifications when work and break sessions complete. You can customize the notification behavior for each session type.
+
+<ParamField path="notification.enabled" type="boolean" default="true">
+  Enable or disable desktop notifications
+  
+  When disabled, sessions complete silently without notifications
+</ParamField>
+
+<ParamField path="notification.urgent" type="boolean" default="false">
+  Mark notification as urgent (platform-dependent behavior)
+  
+  - **Linux:** Persistent notification with alert sound
+  - **macOS:** May trigger alert sound
+  - **Windows:** May stay visible until dismissed
+</ParamField>
+
+<ParamField path="notification.title" type="string">
+  Notification title text
+  
+  **Defaults:**
+  - Work: `"work finished 🎉"`
+  - Break: `"break over 😴"`
+</ParamField>
+
+<ParamField path="notification.message" type="string">
+  Notification message body
+  
+  **Defaults:**
+  - Work: `"time to take a break!"`
+  - Break: `"back to work!"`
+</ParamField>
+
+<ParamField path="notification.icon" type="string">
+  Path to custom notification icon (optional)
+  
+  Supports:
+  - Absolute paths: `/path/to/icon.png`
+  - Home directory: `~/path/to/icon.png`
+  - Windows: `C:\Users\path\to\icon.png`
+  
+  If not specified, uses the built-in Pomo icon
+</ParamField>
+
+## Work session notifications
+
+Configure notifications for when work sessions complete:
+
+```yaml pomo.yaml
+work:
+  duration: 25m
+  title: work session
+  notification:
+    enabled: true
+    urgent: false
+    title: work finished 🎉
+    message: time to take a break
+    icon: ~/icons/pomo-work.png
+```
+
+<Tip>
+Use emojis in notification titles and messages to make them more visually distinctive.
+</Tip>
+
+## Break session notifications
+
+Configure notifications for when break sessions complete:
+
+```yaml pomo.yaml
+break:
+  duration: 5m
+  title: break session
+  notification:
+    enabled: true
+    urgent: false
+    title: break over 😴
+    message: back to work!
+    icon: ~/icons/pomo-break.png
+```
+
+## Platform-specific behavior
+
+Notification appearance and behavior varies by operating system:
+
+<AccordionGroup>
+  <Accordion title="Linux (GNOME, KDE, etc.)" icon="linux">
+    **Standard notifications:**
+    - Appear in system notification area
+    - Auto-dismiss after a few seconds
+    - Silent by default
+    
+    **Urgent notifications:**
+    - Persistent (stay until dismissed)
+    - Play system alert sound
+    - May bypass Do Not Disturb
+    
+    **Requirements:**
+    - `libnotify` or compatible notification daemon
+    - D-Bus session bus
+  </Accordion>
+  
+  <Accordion title="macOS" icon="apple">
+    **Standard notifications:**
+    - Appear in Notification Center
+    - Auto-dismiss based on system settings
+    - Silent by default
+    
+    **Urgent notifications:**
+    - May trigger alert sound
+    - Appear as banner or alert based on system settings
+    
+    **Requirements:**
+    - macOS 10.8 or later
+    - No additional dependencies
+  </Accordion>
+  
+  <Accordion title="Windows" icon="windows">
+    **Standard notifications:**
+    - Appear in Action Center
+    - Auto-dismiss after a few seconds
+    - Silent by default
+    
+    **Urgent notifications:**
+    - May stay visible until dismissed
+    - May trigger system sound
+    
+    **Requirements:**
+    - Windows 10 or later
+    - No additional dependencies
+  </Accordion>
+</AccordionGroup>
+
+## Custom notification icons
+
+You can use custom icons for notifications. The icon path supports:
+
+<CodeGroup>
+```yaml Linux/macOS
+work:
+  notification:
+    icon: ~/icons/work-done.png
+
+break:
+  notification:
+    icon: ~/icons/break-over.png
+```
+
+```yaml Windows
+work:
+  notification:
+    icon: C:\Users\YourName\icons\work-done.png
+
+break:
+  notification:
+    icon: C:\Users\YourName\icons\break-over.png
+```
+
+```yaml Absolute path
+work:
+  notification:
+    icon: /usr/share/icons/pomo-work.png
+```
+</CodeGroup>
+
+<Note>
+If the icon file doesn't exist or can't be loaded, Pomo falls back to the built-in icon.
+</Note>
+
+### Supported icon formats
+
+- **PNG** - Recommended, widely supported
+- **JPEG/JPG** - Supported on most platforms
+- **ICO** - Windows-specific format
+- **ICNS** - macOS-specific format
+
+<Warning>
+Icon file paths are expanded at runtime. If using `~/`, ensure the file exists in your home directory.
+</Warning>
+
+## Notification examples
+
+<CodeGroup>
+```yaml Default notifications
+work:
+  notification:
+    enabled: true
+    urgent: false
+    title: work finished 🎉
+    message: time to take a break
+
+break:
+  notification:
+    enabled: true
+    urgent: false
+    title: break over 😴
+    message: back to work!
+```
+
+```yaml Urgent notifications
+work:
+  notification:
+    enabled: true
+    urgent: true  # Persistent with sound
+    title: Work session complete!
+    message: Take a well-deserved break
+
+break:
+  notification:
+    enabled: true
+    urgent: true  # Persistent with sound
+    title: Break is over
+    message: Ready to get back to work?
+```
+
+```yaml Minimal notifications
+work:
+  notification:
+    enabled: true
+    urgent: false
+    title: Done!
+    message: Break time
+
+break:
+  notification:
+    enabled: true
+    urgent: false
+    title: Ready
+    message: Back to work
+```
+
+```yaml Disabled notifications
+work:
+  notification:
+    enabled: false
+
+break:
+  notification:
+    enabled: false
+```
+</CodeGroup>
+
+## Disabling notifications
+
+To disable notifications for specific session types:
+
+```yaml pomo.yaml
+work:
+  notification:
+    enabled: false  # No notifications for work sessions
+
+break:
+  notification:
+    enabled: true   # Keep break notifications
+```
+
+<Tip>
+You might want to keep work session notifications enabled but disable break notifications if you prefer to start breaks manually.
+</Tip>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Notifications not appearing" icon="circle-exclamation">
+    **Check:**
+    1. Notifications are enabled in config: `enabled: true`
+    2. System notifications are allowed for terminal apps
+    3. Do Not Disturb is not blocking notifications
+    4. On Linux, notification daemon is running (`notify-send` test)
+  </Accordion>
+  
+  <Accordion title="No sound for urgent notifications" icon="volume-slash">
+    **Check:**
+    1. `urgent: true` is set in config
+    2. System volume is not muted
+    3. System alert sounds are enabled in OS settings
+    4. Platform supports urgent notification sounds
+  </Accordion>
+  
+  <Accordion title="Custom icon not showing" icon="image">
+    **Check:**
+    1. Icon file exists at the specified path
+    2. Path is absolute or uses `~/` for home directory
+    3. File format is supported (PNG recommended)
+    4. File permissions allow reading
+    5. On Windows, use backslashes: `C:\\path\\to\\icon.png`
+  </Accordion>
+</AccordionGroup>

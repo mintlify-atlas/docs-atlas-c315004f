@@ -1,0 +1,128 @@
+---
+title: Introduction
+description: A simple, customizable Pomodoro timer for your terminal with ASCII art, progress visualization, and productivity tracking
+---
+
+![Pomo Demo](https://raw.githubusercontent.com/Bahaaio/pomo/main/.github/assets/pomo.gif)
+
+## What is Pomo?
+
+Pomo is a terminal-based Pomodoro timer built with [Bubble Tea](https://github.com/charmbracelet/bubbletea) that brings focus and productivity tracking directly to your command line. Whether you're coding, writing, or working on any task that requires deep focus, Pomo helps you maintain productive work sessions with built-in break reminders.
+
+<CardGroup cols={2}>
+  <Card title="Install Pomo" icon="download" href="/installation">
+    Get Pomo installed on macOS, Windows, or Linux in under a minute
+  </Card>
+  <Card title="Quick start" icon="rocket" href="/quickstart">
+    Run your first Pomodoro session and learn the essential commands
+  </Card>
+</CardGroup>
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Work and break sessions" icon="clock">
+    Complete Pomodoro cycles with configurable work sessions, short breaks, and long breaks after every 4 sessions
+  </Card>
+  
+  <Card title="Real-time progress visualization" icon="chart-simple">
+    Beautiful ASCII art timer display with progress bars and multiple font styles
+  </Card>
+  
+  <Card title="Desktop notifications" icon="bell">
+    Cross-platform native notifications when sessions complete, with customizable messages and sounds
+  </Card>
+  
+  <Card title="Productivity statistics" icon="chart-line">
+    Track your work patterns with duration ratios, weekly bar charts, and GitHub-style 4-month activity heatmaps
+  </Card>
+  
+  <Card title="Keyboard shortcuts" icon="keyboard">
+    Adjust time mid-session, pause/resume, skip sessions, and reset timers with simple key commands
+  </Card>
+  
+  <Card title="Task chaining" icon="link">
+    Automatically chain work and break sessions with user confirmation prompts between each session
+  </Card>
+</CardGroup>
+
+## Timer fonts
+
+Pomo supports multiple ASCII art fonts for the timer display. Choose from `mono12`, `rebel`, `ansi`, or `ansiShadow` to match your aesthetic:
+
+<CardGroup cols={2}>
+  <Card>
+    **mono12** (default)
+    
+    ![mono12](https://raw.githubusercontent.com/Bahaaio/pomo/main/.github/assets/mono12.png)
+  </Card>
+  
+  <Card>
+    **rebel**
+    
+    ![rebel](https://raw.githubusercontent.com/Bahaaio/pomo/main/.github/assets/rebel.png)
+  </Card>
+  
+  <Card>
+    **ansi**
+    
+    ![ansi](https://raw.githubusercontent.com/Bahaaio/pomo/main/.github/assets/ansi.png)
+  </Card>
+  
+  <Card>
+    **ansiShadow**
+    
+    ![ansiShadow](https://raw.githubusercontent.com/Bahaaio/pomo/main/.github/assets/ansiShadow.png)
+  </Card>
+</CardGroup>
+
+<Tip>
+  Configure your preferred font in the `pomo.yaml` configuration file. See [ASCII art configuration](/configuration/ascii-art) for details.
+</Tip>
+
+## Desktop notifications
+
+Pomo sends native desktop notifications when sessions complete, keeping you informed even when you switch away from the terminal.
+
+**Linux (GNOME)**
+
+![Linux Notification](https://raw.githubusercontent.com/Bahaaio/pomo/main/.github/assets/notification_linux.png)
+
+**Windows**
+
+![Windows Notification](https://raw.githubusercontent.com/Bahaaio/pomo/main/.github/assets/notification_windows.jpg)
+
+<Note>
+  Notification appearance varies by operating system and desktop environment. Customize notification titles, messages, and icons in your configuration file.
+</Note>
+
+## Statistics and tracking
+
+Track your productivity over time with the `pomo stats` command:
+
+![Stats](https://raw.githubusercontent.com/Bahaaio/pomo/main/.github/assets/stats.png)
+
+- **Duration ratio** - Compare total work time vs break time
+- **Weekly bar chart** - Visualize daily work hours for the past 7 days
+- **4-month heatmap** - GitHub-style activity visualization showing your work patterns
+
+<Warning>
+  The heatmap visualization requires a [Nerd Font](https://www.nerdfonts.com/) to display correctly.
+</Warning>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Install Pomo using your preferred package manager
+  </Card>
+  <Card title="Quick start" icon="rocket" href="/quickstart">
+    Run your first Pomodoro session in less than 5 minutes
+  </Card>
+  <Card title="Configuration" icon="gear" href="/configuration/overview">
+    Customize session durations, notifications, and appearance
+  </Card>
+  <Card title="Statistics" icon="chart-line" href="/usage/statistics">
+    Learn how to track and analyze your productivity
+  </Card>
+</CardGroup>

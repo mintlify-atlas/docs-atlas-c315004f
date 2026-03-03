@@ -1,0 +1,198 @@
+---
+title: Work sessions
+description: Start and manage focused work sessions with the Pomodoro timer
+---
+
+Work sessions are the core of pomo. Start a timer, focus on your task, and track your productivity.
+
+## Starting a work session
+
+The basic command starts a work session with your configured default duration (25 minutes):
+
+```bash
+pomo
+```
+
+### Custom work duration
+
+Specify a custom work session duration using Go's time format:
+
+```bash
+pomo 30m          # 30 minute work session
+pomo 1h           # 1 hour work session
+pomo 1h15m        # 1 hour 15 minute work session
+pomo 45m          # 45 minute work session
+```
+
+<Note>
+Duration format accepts combinations of hours (`h`), minutes (`m`), and seconds (`s`). Examples: `25m`, `1h30m`, `90m`
+</Note>
+
+### Custom break duration
+
+You can also specify the break duration that follows your work session:
+
+```bash
+pomo 45m 15m      # 45 minute work with 15 minute break
+pomo 1h 10m       # 1 hour work with 10 minute break
+pomo 25m 5m       # 25 minute work with 5 minute break
+```
+
+## The Pomodoro cycle
+
+Pomo implements the classic Pomodoro technique with automatic cycles:
+
+<Steps>
+  <Step title="Work session">
+    Complete a focused work session (default: 25 minutes)
+  </Step>
+  
+  <Step title="Short break">
+    Take a short break (default: 5 minutes)
+  </Step>
+  
+  <Step title="Repeat">
+    Repeat work and break sessions
+  </Step>
+  
+  <Step title="Long break">
+    After 4 work sessions, take a longer break (default: 15 minutes)
+  </Step>
+</Steps>
+
+The long break cycle is configurable in your `pomo.yaml`:
+
+```yaml config/pomo.yaml
+longBreak:
+  enabled: true
+  after: 4          # Take long break after this many work sessions
+  duration: 15m
+```
+
+## Keyboard shortcuts
+
+Control your work session with these keyboard shortcuts:
+
+| Key | Action | Description |
+| --- | ------ | ----------- |
+| `↑` / `k` | Add time | Increase session time by 1 minute |
+| `Space` | Pause/Resume | Pause or resume the timer |
+| `←` / `h` | Reset | Reset timer to initial duration |
+| `s` | Skip | Skip to next session (bypasses prompts) |
+| `q` / `Ctrl+C` | Quit | Exit the timer |
+
+<Tip>
+You can increase the timer mid-session by pressing `↑` or `k`. This is useful when you need just a bit more time to finish a task.
+</Tip>
+
+## Session completion
+
+When a work session completes, pomo can take different actions based on your `onSessionEnd` configuration:
+
+<Tabs>
+  <Tab title="ask (default)">
+    Prompt you to choose the next action:
+    
+    - **Yes** (`y`): Start the next session (break)
+    - **No** (`n`): Exit pomo
+    - **Short session** (`s`): Extend current session by 2 minutes
+    - Navigate options with `Tab` and confirm with `Enter`
+    
+    ```yaml config/pomo.yaml
+    onSessionEnd: "ask"
+    ```
+  </Tab>
+  
+  <Tab title="start">
+    Automatically start the next session without prompting:
+    
+    ```yaml config/pomo.yaml
+    onSessionEnd: "start"
+    ```
+  </Tab>
+  
+  <Tab title="quit">
+    Automatically exit after the session ends:
+    
+    ```yaml config/pomo.yaml
+    onSessionEnd: "quit"
+    ```
+  </Tab>
+</Tabs>
+
+### Short sessions
+
+<Note>
+Short sessions extend the current session by 2 minutes. This is useful when you're in the flow and need just a bit more time before taking a break.
+</Note>
+
+## Desktop notifications
+
+Pomo sends native desktop notifications when work sessions complete:
+
+```yaml config/pomo.yaml
+work:
+  notification:
+    enabled: true
+    urgent: true      # Persistent notification with sound
+    title: work finished 🎉
+    message: time to take a break!
+    icon: ~/my/icon.png
+```
+
+<Warning>
+Notification appearance varies by operating system and desktop environment. The `urgent` flag behavior is platform-dependent.
+</Warning>
+
+## Running commands on completion
+
+Execute custom commands when work sessions complete using the `then` section:
+
+```yaml config/pomo.yaml
+work:
+  then:
+    - [paplay, ~/sounds/work-done.mp3]  # Linux
+    # - [afplay, ~/sounds/work-done.mp3]  # macOS  
+    # - [powershell, start, work-done.mp3]  # Windows
+```
+
+<Note>
+Commands run with a 5 second timeout and are automatically cancelled when starting the next session.
+</Note>
+
+## Examples
+
+### Quick focused session
+
+```bash
+pomo 15m
+```
+
+Start a 15-minute focused work session.
+
+### Deep work block
+
+```bash
+pomo 2h 20m
+```
+
+Start a 2-hour deep work session followed by a 20-minute break.
+
+### Standard Pomodoro
+
+```bash
+pomo 25m 5m
+```
+
+Classic 25-minute work session with 5-minute break.
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Break sessions" icon="mug-hot" href="/usage/break-sessions">
+    Learn about managing break sessions
+  </Card>
+  <Card title="Statistics" icon="chart-line" href="/usage/statistics">
+    Track your productivity metrics
+  </Card>
+</CardGroup>

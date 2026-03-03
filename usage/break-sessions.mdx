@@ -1,0 +1,205 @@
+---
+title: Break sessions
+description: Manage breaks between work sessions to maintain productivity
+---
+
+Break sessions help you recharge between focused work periods. While pomo automatically schedules breaks after work sessions, you can also start manual breaks.
+
+## Starting a break session
+
+Start a break session with the default duration (5 minutes):
+
+```bash
+pomo break
+```
+
+### Custom break duration
+
+Specify a custom break duration:
+
+```bash
+pomo break 10m      # 10 minute break
+pomo break 15m      # 15 minute break
+pomo break 30m      # 30 minute break
+```
+
+<Note>
+Break durations use the same format as work sessions: `5m`, `1h`, `1h30m`, etc.
+</Note>
+
+## When to use manual breaks
+
+Manual break sessions are useful when:
+
+- You need a break outside the normal Pomodoro cycle
+- You want to time a specific activity (coffee, walk, lunch)
+- You're returning from an interruption and want to track the time
+- You're using pomo for time tracking without strict work/break cycles
+
+<Tip>
+If you're following the Pomodoro cycle, let pomo automatically transition to breaks after work sessions. This maintains your long break counter and cycle tracking.
+</Tip>
+
+## Break types
+
+Pomo supports two types of breaks in the Pomodoro cycle:
+
+### Short breaks
+
+Short breaks occur after each work session:
+
+```yaml config/pomo.yaml
+break:
+  duration: 5m
+  title: break session
+```
+
+Default short breaks are 5 minutes and help you reset between focused work periods.
+
+### Long breaks
+
+Long breaks occur after a configured number of work sessions:
+
+```yaml config/pomo.yaml
+longBreak:
+  enabled: true
+  after: 4          # After 4 work sessions
+  duration: 15m
+```
+
+<Steps>
+  <Step title="Complete work sessions">
+    Finish 4 work sessions (configurable via `after`)
+  </Step>
+  
+  <Step title="Long break triggered">
+    Pomo automatically offers a long break instead of short break
+  </Step>
+  
+  <Step title="Cycle resets">
+    After the long break, the counter resets and starts tracking toward the next long break
+  </Step>
+</Steps>
+
+<Warning>
+Manually starting a break with `pomo break` does **not** count toward the Pomodoro cycle. It's tracked separately from automatic breaks that follow work sessions.
+</Warning>
+
+## Break session controls
+
+Break sessions support the same keyboard shortcuts as work sessions:
+
+| Key | Action | Description |
+| --- | ------ | ----------- |
+| `↑` / `k` | Add time | Increase break time by 1 minute |
+| `Space` | Pause/Resume | Pause or resume the timer |
+| `←` / `h` | Reset | Reset timer to initial duration |
+| `s` | Skip | Skip break and return to work |
+| `q` / `Ctrl+C` | Quit | Exit the timer |
+
+## Desktop notifications
+
+Configure notifications for when breaks complete:
+
+```yaml config/pomo.yaml
+break:
+  notification:
+    enabled: true
+    urgent: false
+    title: break over 😴
+    message: back to work!
+    icon: ~/my/icon.png
+```
+
+## Running commands on completion
+
+Execute custom commands when breaks end:
+
+```yaml config/pomo.yaml
+break:
+  then:
+    - [spd-say, "Back to work!"]          # Linux TTS
+    # - [say, "Back to work!"]             # macOS TTS
+    # - [powershell, Add-Type, ...]        # Windows
+```
+
+<Note>
+Commands run with a 5 second timeout and are automatically cancelled if you start another session.
+</Note>
+
+## Break session completion
+
+When a break completes, pomo follows the same `onSessionEnd` behavior as work sessions:
+
+<Tabs>
+  <Tab title="ask (default)">
+    Prompt you to start the next work session:
+    
+    ```yaml config/pomo.yaml
+    onSessionEnd: "ask"
+    ```
+  </Tab>
+  
+  <Tab title="start">
+    Automatically start the next work session:
+    
+    ```yaml config/pomo.yaml
+    onSessionEnd: "start"
+    ```
+  </Tab>
+  
+  <Tab title="quit">
+    Exit pomo after the break:
+    
+    ```yaml config/pomo.yaml
+    onSessionEnd: "quit"
+    ```
+  </Tab>
+</Tabs>
+
+## Examples
+
+### Quick coffee break
+
+```bash
+pomo break 10m
+```
+
+Time a 10-minute coffee break.
+
+### Lunch break
+
+```bash
+pomo break 1h
+```
+
+Time a 1-hour lunch break.
+
+### Extended rest
+
+```bash
+pomo break 30m
+```
+
+Take a longer 30-minute break after an intense work session.
+
+## Statistics tracking
+
+All break sessions are tracked in your statistics:
+
+- Total break duration (all-time)
+- Break time in duration ratio
+- Break sessions are stored in the database with type `break`
+
+This helps you understand your work/break balance over time.
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Work sessions" icon="laptop-code" href="/usage/work-sessions">
+    Learn about starting work sessions
+  </Card>
+  <Card title="Statistics" icon="chart-line" href="/usage/statistics">
+    View your work and break statistics
+  </Card>
+</CardGroup>

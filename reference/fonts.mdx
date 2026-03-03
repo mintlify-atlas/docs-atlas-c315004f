@@ -1,0 +1,262 @@
+---
+title: ASCII fonts
+description: Gallery of ASCII art fonts available for the Pomo timer display
+---
+
+Pomo includes four built-in ASCII art fonts to customize how the countdown timer appears. Each font has a unique visual style for displaying digits 0-9 and the colon separator.
+
+## Available fonts
+
+All fonts are rendered using Unicode box-drawing characters and blocks for clean terminal display.
+
+<Tabs>
+  <Tab title="mono12">
+    **mono12** (default) - Clean, monospaced font with rounded edges
+    
+    This is the default font used when `asciiArt.font` is not specified or when no configuration file exists.
+    
+    ### Style characteristics
+    - Medium height (7 lines)
+    - Rounded corners using `▀` and `▄` blocks
+    - Clear digit separation
+    - Works well in any terminal size
+    
+    ### Example digits
+    ```
+       ▄▄▄▄       ▄▄▄       ▄▄▄▄▄      ▄▄▄▄▄   
+      ██▀▀██    █▀██     █▀▀▀▀██▄   █▀▀▀▀██▄ 
+     ██    ██     ██           ██         ▄██ 
+     ██ ██ ██     ██         ▄█▀        █████  
+     ██    ██     ██       ▄█▀             ▀██ 
+      ██▄▄██   ▄▄▄██▄▄▄  ▄██▄▄▄▄▄   █▄▄▄▄██▀ 
+       ▀▀▀▀    ▀▀▀▀▀▀▀▀  ▀▀▀▀▀▀▀▀    ▀▀▀▀▀   
+    ```
+    
+    ### Timer example
+    ```
+        ▄▄▄▄          ▄▄▄▄▄   
+       ██▀▀██    ▄▄  █▀▀▀▀██▄ 
+      ██    ██   ██        ▄██ 
+      ██ ██ ██        ▄▄▄▄ ██ 
+      ██    ██   ██  ██    ██ 
+       ██▄▄██    ▀▀   ██▄▄██▀ 
+        ▀▀▀▀           ▀▀▀▀   
+    ```
+    25:00 displayed in mono12 font
+  </Tab>
+  
+  <Tab title="rebel">
+    **rebel** - Bold, angular font with gradient shading
+    
+    ### Style characteristics
+    - Tall height (8 lines)
+    - Uses `█` and `▒` for depth effect
+    - Angular, geometric design
+    - Most visually striking option
+    
+    ### Example digits
+    ```
+        █████       ████      ████████   ████████  
+      ███▒▒▒███    ▒▒███    ███▒▒▒▒███ ███▒▒▒▒███ 
+     ███   ▒▒███    ▒███   ▒▒▒    ▒███▒▒▒    ▒███ 
+    ▒███    ▒███    ▒███      ███████     ██████▒  
+    ▒███    ▒███    ▒███     ███▒▒▒▒     ▒▒▒▒▒▒███ 
+    ▒▒███   ███     ▒███    ███      █  ███   ▒███ 
+     ▒▒▒█████▒     █████   ▒██████████ ▒▒████████  
+       ▒▒▒▒▒▒     ▒▒▒▒▒    ▒▒▒▒▒▒▒▒▒▒   ▒▒▒▒▒▒▒▒   
+    ```
+    
+    ### Timer example
+    ```
+        █████                  ████████  
+      ███▒▒▒███               ███▒▒▒▒███ 
+     ███   ▒▒███    ██       ▒▒▒    ▒███ 
+    ▒███    ▒███              ██████▒  
+    ▒███    ▒███    ██       ▒▒▒▒▒▒███ 
+    ▒▒███   ███     ▀▀      ███   ▒███ 
+     ▒▒▒█████▒             ▒▒████████  
+       ▒▒▒▒▒▒               ▒▒▒▒▒▒▒▒   
+    ```
+    25:00 displayed in rebel font
+  </Tab>
+  
+  <Tab title="ansi">
+    **ansi** - Compact, solid block font
+    
+    ### Style characteristics
+    - Shortest height (5 lines)
+    - Solid `█` blocks throughout
+    - Compact vertical spacing
+    - Best for smaller terminals
+    
+    ### Example digits
+    ```
+     ██████   ██      ██████   ██████  
+    ██  ████ ███          ██       ██  
+    ██ ██ ██  ██      █████    █████   
+    ████  ██  ██     ██            ██  
+     ██████   ██     ███████  ██████   
+    ```
+    
+    ### Timer example
+    ```
+     ██████           ██████  
+    ██  ████  ██         ██  
+    ██ ██ ██       ▄▄▄  █████   
+    ████  ██  ██         ██  
+     ██████   ▀▀     ██████   
+    ```
+    25:00 displayed in ansi font
+  </Tab>
+  
+  <Tab title="ansiShadow">
+    **ansiShadow** - Elegant font with box-drawing borders
+    
+    ### Style characteristics
+    - Medium height (6 lines)
+    - Uses `╔╗╚╝║═` box-drawing characters
+    - Clean, professional appearance
+    - Excellent readability
+    
+    ### Example digits
+    ```
+     ██████╗  ██╗     ██████╗  ██████╗ 
+    ██╔═████╗███║    ╚════██╗╚════██╗
+    ██║██╔██║╚██║     █████╔╝ █████╔╝
+    ████╔╝██║ ██║    ██╔═══╝  ╚═══██╗
+    ╚██████╔╝ ██║    ███████╗██████╔╝
+     ╚═════╝  ╚═╝    ╚══════╝╚═════╝ 
+    ```
+    
+    ### Timer example
+    ```
+     ██████╗           ██████╗ 
+    ██╔═████╗  ██╗    ╚════██╗
+    ██║██╔██║  ╚═╝     █████╔╝
+    ████╔╝██║  ██╗    ██╔═══╝ 
+    ╚██████╔╝  ╚═╝    ███████╗
+     ╚═════╝          ╚══════╝
+    ```
+    25:00 displayed in ansiShadow font
+  </Tab>
+</Tabs>
+
+---
+
+## Configuration
+
+To use a specific font, set the `asciiArt.font` option in your `pomo.yaml` configuration file:
+
+```yaml pomo.yaml
+asciiArt:
+  enabled: true
+  font: "rebel"        # Options: mono12, rebel, ansi, ansiShadow
+  color: "#FF6B6B"     # Optional: customize the color
+```
+
+### Font options
+
+<ParamField path="asciiArt.font" type="string" default="mono12">
+  The ASCII art font to use for the timer display.
+  
+  **Valid values:**
+  - `mono12` - Default rounded monospace font
+  - `rebel` - Bold angular font with shading
+  - `ansi` - Compact solid block font
+  - `ansiShadow` - Box-drawing bordered font
+  
+  **Example:**
+  ```yaml
+  asciiArt:
+    font: "ansiShadow"
+  ```
+</ParamField>
+
+<ParamField path="asciiArt.enabled" type="boolean" default="true">
+  Enable or disable ASCII art timer display.
+  
+  When disabled, Pomo shows a simpler text-based timer.
+  
+  **Example:**
+  ```yaml
+  asciiArt:
+    enabled: false  # Use simple text timer
+  ```
+</ParamField>
+
+<ParamField path="asciiArt.color" type="string" default="#FF6B6B">
+  Hex color code for the ASCII art timer display.
+  
+  Supports standard hex color format with `#` prefix.
+  
+  **Example:**
+  ```yaml
+  asciiArt:
+    color: "#00FF00"  # Bright green
+  ```
+</ParamField>
+
+---
+
+## Font comparison
+
+Choose a font based on your terminal size and visual preference:
+
+| Font | Height | Style | Best for |
+|------|--------|-------|----------|
+| **mono12** | 7 lines | Clean, rounded | Default choice, balanced design |
+| **rebel** | 8 lines | Bold, angular | Large terminals, maximum impact |
+| **ansi** | 5 lines | Compact, solid | Small terminals, minimal space |
+| **ansiShadow** | 6 lines | Bordered, elegant | Professional appearance |
+
+---
+
+## Technical implementation
+
+Fonts are defined in `ui/ascii/fonts.go` as arrays of 11 strings:
+- Indices 0-9: Digit characters 0-9
+- Index 10: Colon separator (`:`)
+
+Each font character is stored as a multi-line string with consistent width for proper alignment in the terminal.
+
+### Font constants
+
+```go
+const (
+    Mono12      = "mono12"
+    Rebel       = "rebel"
+    Ansi        = "ansi"
+    AnsiShadow  = "ansiShadow"
+    DefaultFont = Mono12
+)
+```
+
+---
+
+## Terminal compatibility
+
+All fonts use Unicode characters that are widely supported in modern terminals:
+
+- **Required**: Unicode support (UTF-8 encoding)
+- **Recommended**: True color support for custom colors
+- **Works with**: iTerm2, Terminal.app, Alacritty, kitty, Windows Terminal, GNOME Terminal, etc.
+
+<Note>
+  If ASCII art doesn't render correctly, check that your terminal:
+  1. Has UTF-8 encoding enabled
+  2. Uses a font that includes Unicode box-drawing characters (most monospace fonts do)
+  3. Has sufficient terminal width (at least 40 columns recommended)
+</Note>
+
+---
+
+## Disabling ASCII art
+
+If you prefer a simpler display or encounter rendering issues:
+
+```yaml pomo.yaml
+asciiArt:
+  enabled: false
+```
+
+This will show a minimal text-based timer instead of the large ASCII art display.
