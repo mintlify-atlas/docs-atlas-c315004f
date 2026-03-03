@@ -1,0 +1,79 @@
+{
+  "projectType": "cli-tool",
+  "projectName": "Pomo",
+  "projectDescription": "Customizable TUI Pomodoro timer with ASCII art, progress bar, desktop notifications, and productivity statistics.",
+  "theme": "palm",
+  "primaryColor": "#5A56E0",
+  "lightColor": "#7B78FF",
+  "darkColor": "#3E3BA8",
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get Started",
+        "pages": [
+          "introduction",
+          "installation",
+          "quickstart"
+        ]
+      },
+      {
+        "group": "Usage",
+        "pages": [
+          "usage/work-sessions",
+          "usage/break-sessions",
+          "usage/statistics"
+        ]
+      },
+      {
+        "group": "Configuration",
+        "pages": [
+          "configuration/overview",
+          "configuration/session-settings",
+          "configuration/ascii-art",
+          "configuration/notifications",
+          "configuration/commands"
+        ]
+      },
+      {
+        "group": "Reference",
+        "pages": [
+          "reference/commands",
+          "reference/keybindings",
+          "reference/fonts",
+          "reference/configuration-schema"
+        ]
+      },
+      {
+        "group": "Advanced",
+        "pages": [
+          "advanced/sound-notifications",
+          "advanced/custom-commands",
+          "advanced/troubleshooting"
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Work and break timer sessions with Pomodoro cycles",
+    "Task chaining with user confirmation prompts",
+    "Real-time progress bar visualization",
+    "Keyboard shortcuts to adjust time mid-session",
+    "Pause, resume, and skip sessions",
+    "Cross-platform desktop notifications",
+    "Clean, minimal TUI with customizable ASCII art timer fonts",
+    "Custom commands when timers complete",
+    "Productivity statistics with duration ratios and heatmaps",
+    "Weekly bar chart and 4-month GitHub-style activity visualization"
+  ],
+  "publicApiSurface": [
+    "pomo [work duration] [break duration] - Start a work session",
+    "pomo break [duration] - Start a break session",
+    "pomo stats - Display productivity statistics",
+    "Configuration via pomo.yaml",
+    "Session types: work, break, longBreak",
+    "ASCII fonts: mono12, rebel, ansi, ansiShadow",
+    "Notification settings: enabled, urgent, title, message, icon",
+    "Commands: then (custom commands after session)",
+    "Session end actions: ask, start, quit"
+  ]
+}
