@@ -62,15 +62,15 @@ longBreak:
   
   **Valid values:**
   - `ask` - Show confirmation dialog asking if you want to start the next session
-  - `auto` - Automatically start the next session without prompting
-  - `stop` - Exit Pomo when session completes
+  - `start` - Automatically start the next session without prompting
+  - `quit` - Exit Pomo when session completes
   
   **Example:**
   ```yaml
-  onSessionEnd: auto  # Automatically chain sessions
+  onSessionEnd: start  # Automatically chain sessions
   ```
   
-  **Note:** Even with `auto`, you can still use keybindings to control the timer during the session.
+  **Note:** Even with `start`, you can still use keybindings to control the timer during the session.
 </ParamField>
 
 ---
